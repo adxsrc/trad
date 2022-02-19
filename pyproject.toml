@@ -8,6 +8,9 @@ packages = [{include="trad", from="mod"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+numpy = "^1.22"
+astropy = "^5.0"
+
 
 [build-system]
 requires = ["poetry-core"]
