@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "trad"
+version = "0.0.0"
+description = "Composable Radiative Transfer"
+authors = ["Chi-kwan Chan <chanc@arizona.edu>"]
+readme = "README.md"
+packages = [{include="trad", from="mod"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
