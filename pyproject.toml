@@ -3,7 +3,7 @@ name = "trad"
 version = "0.0.0"
 description = "Composable Radiative Transfer"
 authors = ["Chi-kwan Chan <chanc@arizona.edu>"]
-readme = "README.md"
+readme = "README.rst"
 packages = [{include="trad", from="mod"}]
 
 [tool.poetry.dependencies]
