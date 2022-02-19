@@ -20,4 +20,7 @@ from numpy   import exp
 
 def Bnu(nu, T):
     """Planck's law"""
-    return (2*c.h) / (c.c*c.c) * (nu*nu*nu) / (exp((c.h*nu) / (c.k_B*T)) - 1) / u.sr
+    A = 2 * c.h  / (c.c*c.c) / u.sr
+    x = (c.h*nu) / (c.k_B*T)
+    B = A * (nu*nu*nu) / (exp(x) - 1)
+    return B.to(u.W / u.sr / (u.m*u.m) / u.Hz)
