@@ -11,6 +11,11 @@ python = "^3.8"
 numpy = "^1.22"
 astropy = "^5.0"
 
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^4.4.0"
 
 [build-system]
 requires = ["poetry-core"]
