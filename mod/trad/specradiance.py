@@ -13,7 +13,24 @@
 # limitations under the License.
 
 
-"""Spectral Radiances or Specific Intensities"""
+r"""Spectral Radiances or Specific Intensities
+
+"Intensity" is the historically name of "radiance" but in astronomy we
+are stuck with it.
+
+Spectral radiance, or specific intensity, in frequency or wavelength
+are often denoted as :math:`I_\nu` or :math:`I_\lambda`.
+They are sometime referred as "brightness" and has the generic symbol
+:math:`B`.
+
+The SI unit of radiance is
+:math:`\mathrm{W}\,\mathrm{sr}^{-1}\mathrm{m}^{-2}`.
+Hence, the SI and cgs unit of spectral radiance in frequency are
+:math:`\mathrm{W}\,\mathrm{sr}^{-1}\mathrm{m}^{-2}\mathrm{Hz}^{-1}` and
+:math:`\mathrm{erg}\,\mathrm{s}^{-1}\mathrm{sr}^{-1}\mathrm{m}^{-2}\mathrm{Hz}^{-1}`,
+respectively.
+
+"""
 
 
 from astropy import constants as c, units as u
