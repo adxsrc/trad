@@ -39,3 +39,21 @@ from matplotlib import pyplot as plt
 
 from trad.sync import *
 ```
+
+## Standard Assumptions
+
+We set the standard parameters.
+Note that we skip setting the electron number density $n_e$, because that is the parameter we need to fit.
+
+```python
+nu     = 230    * u.GHz            # observe frequency
+
+M      = 4.14e6 * c.M_sun          # black hole mass
+R      = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone model 
+D      = 8127   * u.pc             # distance to black hole
+
+theta  = pi / 3 * u.rad            # angle between magnetic field and line of sight
+Thetae = 10                        # dimensionless electron tempearture
+Rhigh  = 3                         # R_high parameter
+beta   = 1                         # plasma beta
+```
