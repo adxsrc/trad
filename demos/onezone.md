@@ -107,6 +107,14 @@ x0 = r.x[0]
 display(r)
 ```
 
-```python
+## Display the Solution
 
+```python
+ne = x0/u.cm**3 # solution
+
+display(ne)
+display(B(ne))
+display(nu.to(u.Hz)*Lnu(ne))
+display(Fnu(ne))
+display(taunu(ne))
 ```
