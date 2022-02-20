@@ -57,3 +57,26 @@ Thetae = 10                        # dimensionless electron tempearture
 Rhigh  = 3                         # R_high parameter
 beta   = 1                         # plasma beta
 ```
+
+## The One Zone Model
+
+Using a uniform plasma ball with radius $R$, our one zone model leads to:
+
+```python
+def B(ne):
+    "Magnetic field strength in G"
+    Te = (c.m_e * c.c**2 * Thetae / c.k_B).to(u.K)
+    return ((2 * c.mu0 * c.k_B * ne * Te * (1 + Rhigh) / beta)**(1/2)).to(u.G)
+
+def Lnu(ne):
+    P = jnu(nu, ne, Thetae, B(ne), theta) * (4 * pi * u.sr)
+    V = (4/3) * pi * R**3
+    return (P * V).to(u.erg / u.s / u.Hz)
+
+def Fnu(ne):
+    S = 4 * pi * D * D
+    return (Lnu(ne) / S).to(u.Jy)
+
+def taunu(ne):
+    return (R * anu(nu, ne, Thetae, B(ne), theta)).to(u.dimensionless_unscaled)
+```
