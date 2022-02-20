@@ -80,3 +80,15 @@ def Fnu(ne):
 def taunu(ne):
     return (R * anu(nu, ne, Thetae, B(ne), theta)).to(u.dimensionless_unscaled)
 ```
+
+## Sanity Check
+
+We know $n_e \sim 10^6\,\mathrm{cm}^{-3}$.
+Check if this give reasonable magnetic field and flux.
+
+```python
+ne = 1e6 / u.cm**3 # make a first guess...
+
+display(B(ne))
+display(Fnu(ne))
+```
