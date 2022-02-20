@@ -34,6 +34,8 @@ We will also use `scipy` for root finding and `matplotlib` for plotting.
 %load_ext autoreload
 %autoreload 2
 
+import numpy as np
+
 from astropy        import constants as c, units as u
 from scipy.optimize import root
 from matplotlib     import pyplot as plt
@@ -86,8 +88,8 @@ We know $n_e \sim 10^6\,\mathrm{cm}^{-3}$.
 Check if this give reasonable magnetic field and flux.
 
 ```python
-nu = 230 * u.GHz   # observe frequency
-ne = 1e6 / u.cm**3 # make a first guess...
+nu = 230e9 * u.Hz    # observe frequency
+ne =   1e6 / u.cm**3 # make a first guess...
 
 display(B(ne))
 display(Fnu(nu, ne))
@@ -116,4 +118,29 @@ display(B(ne))
 display(nu.to(u.Hz)*Lnu(nu, ne))
 display(Fnu(nu, ne))
 display(taunu(nu, ne))
+```
+
+## Sgr A* SED
+
+Plot only the synchrotron SED for Sgr A*, assuming the electron number density is the 1/2 of the solved one, the solved one, and 2x the solved one.
+
+```python
+nu_obs = np.logspace(8,16,num=65) * u.Hz
+
+fig, ax = plt.subplots(1,1,figsize=(8,8))
+
+ax.set_xlim(1e8, 1e16)
+ax.set_ylim(1e28,1e36)
+
+ax.set_xlabel(r'Frequency $\nu$ [Hz]')
+ax.set_ylabel(r'$\nu L_\nu$ [erg/s]')
+
+nuLnu_obs = nu_obs * Lnu(nu_obs, ne/2)
+ax.loglog(nu_obs, nuLnu_obs)
+
+nuLnu_obs = nu_obs * Lnu(nu_obs, ne)
+ax.loglog(nu_obs, nuLnu_obs)
+
+nuLnu_obs = nu_obs * Lnu(nu_obs, ne*2)
+ax.loglog(nu_obs, nuLnu_obs)
 ```
