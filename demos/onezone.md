@@ -28,14 +28,15 @@ To streamline the development of `trad`, we enable the autoreload `ipython` exte
 This makes any changes to `trad` code automatically available in this notebook. 
 
 We first input the necessary `python` modules.  Just like `trad`, we use `astropy`'s unit and constant modules.
-We will also use `matplotlib` for plotting.
+We will also use `scipy` for root finding and `matplotlib` for plotting.
 
 ```python
 %load_ext autoreload
 %autoreload 2
 
-from astropy    import constants as c, units as u
-from matplotlib import pyplot as plt
+from astropy        import constants as c, units as u
+from scipy.optimize import root
+from matplotlib     import pyplot as plt
 
 from trad.sync import *
 ```
@@ -91,4 +92,21 @@ ne = 1e6 / u.cm**3 # make a first guess...
 
 display(B(ne))
 display(Fnu(ne))
+```
+
+## Solve the One-Zone Model
+
+Really solve for $n_e$ using `scipy.optimize.root`.
+
+```python
+Fnu_obs = 2.4 * u.Jy # target flux
+
+r  = root(lambda ne: (Fnu(ne/u.cm**3) - Fnu_obs).value, 1e6)
+x0 = r.x[0]
+
+display(r)
+```
+
+```python
+
 ```
