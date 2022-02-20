@@ -4,5 +4,5 @@ API
 .. automodule:: trad.specradiance
    :members:
 
-.. automodule:: trad.emissivity
+.. automodule:: trad.sync
    :members:

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-r"""Emissivities
+r"""Synchrotron Emissivity and Absorptivity
 
 The terminology of emissivity (and absorptivity) are confusing.
 
@@ -49,8 +49,10 @@ from astropy import constants as c, units as u
 from numpy   import pi, sqrt, exp, sin
 from scipy.special import kn
 
+from .specradiance import Bnu
 
-def jsyncnu(nu, ne, Thetae, B, theta):
+
+def jnu(nu, ne, Thetae, B, theta):
     r"""Synchrotron emissivity
 
     An approximation of the synchrotron emissivity at given
@@ -89,3 +91,10 @@ def jsyncnu(nu, ne, Thetae, B, theta):
 
     J = A * (ne*nus) * (Y/K)
     return J.to(u.W / u.sr / u.m**3 / u.Hz)
+
+
+def anu(nu, ne, Thetae, B, theta):
+    r"""Synchrotron absorptivity"""
+    T = (Thetae * c.m_e * c.c**2 / c.k_B).to(u.K)
+    a = jnu(nu, ne, Thetae, B, theta) / Bnu(nu, T)
+    return a.to(1/u.m)
