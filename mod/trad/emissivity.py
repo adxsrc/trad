@@ -56,7 +56,7 @@ def jsyncnu(nu, ne, Thetae, B, theta):
     An approximation of the synchrotron emissivity at given
     frequency               :math:`\nu`,
     electron number density :math:`n_e`,
-    electron temperature    :math:`\Theta_e`,
+    electron temperature    :math:`T_e`,
     magnetic field strength :math:`B`, and
     magnetic pitch angle    :math:`\theta`,
     derived by Leung et al. (2011):
@@ -67,13 +67,16 @@ def jsyncnu(nu, ne, Thetae, B, theta):
         (X^{1/2} + 2^{11/12} X^{1/6})^2 \exp(-X^{1/3}),
 
     where
+    :math:`\Theta_e = k_\mathrm{B}T_e / m_e c^2` is the dimensionless
+    electron temperature,
     :math:`\nu_\mathrm{s} = (2/9)\nu_\mathrm{c}\Theta_e^2` is a
-    synchrotron characteristic frequency and
+    synchrotron characteristic frequency, and
     :math:`X = \nu/\nu_\mathrm{s}`,
-    with :math:`e`, :math:`c`, :math:`K_2`, and :math:`\nu_\mathrm{c}
-    = eB/2\pi m_e` being the electron charge, speed of light, modified
-    Bessel function of the second kind of order 2, and the electron
-    cyclotron frequency, respectively.
+    with :math:`k_\mathrm{B}`, :math:`m_e`, :math:`e`, :math:`c`,
+    :math:`K_2`, and :math:`\nu_\mathrm{c} = eB/2\pi m_e` being the
+    Boltzmann constant, electron mass, electron charge, speed of
+    light, modified Bessel function of the second kind of order 2, and
+    the electron cyclotron frequency, respectively.
 
     """
     nuc = (c.si.e * B / (2 * pi * c.m_e)).to(u.Hz) # electron cyclotron frequency
