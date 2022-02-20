@@ -47,8 +47,6 @@ We set the standard parameters.
 Note that we skip setting the electron number density $n_e$, because that is the parameter we need to fit.
 
 ```python
-nu     = 230    * u.GHz            # observe frequency
-
 M      = 4.14e6 * c.M_sun          # black hole mass
 R      = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone model 
 D      = 8127   * u.pc             # distance to black hole
@@ -69,16 +67,16 @@ def B(ne):
     Te = (c.m_e * c.c**2 * Thetae / c.k_B).to(u.K)
     return ((2 * c.mu0 * c.k_B * ne * Te * (1 + Rhigh) / beta)**(1/2)).to(u.G)
 
-def Lnu(ne):
+def Lnu(nu, ne):
     P = jnu(nu, ne, Thetae, B(ne), theta) * (4 * pi * u.sr)
     V = (4/3) * pi * R**3
     return (P * V).to(u.erg / u.s / u.Hz)
 
-def Fnu(ne):
+def Fnu(nu, ne):
     S = 4 * pi * D * D
-    return (Lnu(ne) / S).to(u.Jy)
+    return (Lnu(nu, ne) / S).to(u.Jy)
 
-def taunu(ne):
+def taunu(nu, ne):
     return (R * anu(nu, ne, Thetae, B(ne), theta)).to(u.dimensionless_unscaled)
 ```
 
@@ -88,10 +86,11 @@ We know $n_e \sim 10^6\,\mathrm{cm}^{-3}$.
 Check if this give reasonable magnetic field and flux.
 
 ```python
+nu = 230 * u.GHz   # observe frequency
 ne = 1e6 / u.cm**3 # make a first guess...
 
 display(B(ne))
-display(Fnu(ne))
+display(Fnu(nu, ne))
 ```
 
 ## Solve the One-Zone Model
@@ -101,7 +100,7 @@ Really solve for $n_e$ using `scipy.optimize.root`.
 ```python
 Fnu_obs = 2.4 * u.Jy # target flux
 
-r  = root(lambda ne: (Fnu(ne/u.cm**3) - Fnu_obs).value, 1e6)
+r  = root(lambda ne: (Fnu(nu, ne/u.cm**3) - Fnu_obs).value, 1e6)
 x0 = r.x[0]
 
 display(r)
@@ -114,7 +113,7 @@ ne = x0/u.cm**3 # solution
 
 display(ne)
 display(B(ne))
-display(nu.to(u.Hz)*Lnu(ne))
-display(Fnu(ne))
-display(taunu(ne))
+display(nu.to(u.Hz)*Lnu(nu, ne))
+display(Fnu(nu, ne))
+display(taunu(nu, ne))
 ```
