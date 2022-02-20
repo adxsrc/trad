@@ -1,5 +1,8 @@
 API
 ===
 
-.. automodule:: trad.core
+.. automodule:: trad.specradiance
+   :members:
+
+.. automodule:: trad.emissivity
    :members:
