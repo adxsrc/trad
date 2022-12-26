@@ -35,7 +35,8 @@ respectively.
 
 from astropy import constants as c, units as u
 
-from .units import *
+from .units  import *
+from .helper import *
 
 
 def blackbody(*args, backend=None, **kwargs):
@@ -57,13 +58,7 @@ def blackbody(*args, backend=None, **kwargs):
 
     """
 
-    if backend is None:
-        import sys
-        if 'jax' in sys.modules:
-            import jax.numpy as backend
-        else:
-            import numpy as backend
-    exp = backend.exp
+    exp = get_backend(backend).exp
 
     kwargs  = merge(['nu', 'T'], args, kwargs)
     nu_unit = arg_unit('nu', u.Hz, kwargs)
