@@ -35,8 +35,10 @@ respectively.
 
 from astropy import constants as c, units as u
 
+from .units import *
 
-def blackbody(nu_unit=u.Hz, T_unit=u.K, unit=u.W/u.sr/u.m**2/u.Hz, backend=None):
+
+def blackbody(backend=None, **kwargs):
     r"""Planck's law
 
     Spectral density of electromagnetic radiation emitted by a black
@@ -62,6 +64,13 @@ def blackbody(nu_unit=u.Hz, T_unit=u.K, unit=u.W/u.sr/u.m**2/u.Hz, backend=None)
         else:
             import numpy as backend
     exp = backend.exp
+
+    nu_unit = arg_unit('nu', u.Hz, kwargs)
+    T_unit  = arg_unit('T',  u.K,  kwargs)
+    unit    = ret_unit({
+        'si' : (u.W      ) / u.sr / (u.m *u.m ) / u.Hz,
+        'cgs': (u.erg/u.s) / u.sr / (u.cm*u.cm) / u.Hz,
+    }, 'si', kwargs)
 
     a_v = float((2 * c.h * nu_unit**3) / (c.c**2 * u.sr) / unit)**(1/3)
     x_v = float((c.h * nu_unit) / (c.k_B * T_unit))
