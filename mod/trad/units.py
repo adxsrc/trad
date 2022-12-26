@@ -19,6 +19,17 @@
 from astropy import units as u
 
 
+def merge(keys, args, kwargs):
+    """Merge Arguments with Keyworded Arguments"""
+
+    if len(args) > len(keys):
+        raise ValueError(
+            f'Factory expects {len(keys)} argument(s) but {len(args)} were given.')
+
+    d = {k:a for k, a in zip(keys, args)}
+    return {**kwargs, **d}
+
+
 def arg_unit(name, default, kwargs):
     """Deduce Argument Units from `kwarg`"""
 
