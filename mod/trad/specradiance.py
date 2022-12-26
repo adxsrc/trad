@@ -63,10 +63,10 @@ def blackbody(nu_unit=u.Hz, T_unit=u.K, unit=u.W/u.sr/u.m**2/u.Hz, backend=None)
             import numpy as backend
     exp = backend.exp
 
-    A_v = float((2 * c.h * nu_unit**3) / (c.c**2 * u.sr) / unit)
+    a_v = float((2 * c.h * nu_unit**3) / (c.c**2 * u.sr) / unit)**(1/3)
     x_v = float((c.h * nu_unit) / (c.k_B * T_unit))
     def B(nu, T):
-        return A_v * nu**3 / (exp(x_v * nu/T) - 1)
+        return (a_v * nu)**3 / (exp(x_v * nu/T) - 1)
 
     B.unit = unit
     return B
