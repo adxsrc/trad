@@ -39,3 +39,15 @@ def arg_unit(name, default, kwargs):
         return kwargs[unit]
     else:
         return default
+
+
+def ret_unit(ud, default, kwargs):
+    """Deduce Return Units from `kwarg`"""
+
+    r = kwargs.get('units', default)
+    if isinstance(r, u.UnitBase):
+        return r
+    elif r in ud:
+        return ud[r]
+    else:
+        raise u.UnitConversionError(f'{r} is not supported by `trad`')
