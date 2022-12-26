@@ -38,7 +38,7 @@ from astropy import constants as c, units as u
 from .units import *
 
 
-def blackbody(backend=None, **kwargs):
+def blackbody(*args, backend=None, **kwargs):
     r"""Planck's law
 
     Spectral density of electromagnetic radiation emitted by a black
@@ -65,6 +65,7 @@ def blackbody(backend=None, **kwargs):
             import numpy as backend
     exp = backend.exp
 
+    kwargs  = merge(['nu', 'T'], args, kwargs)
     nu_unit = arg_unit('nu', u.Hz, kwargs)
     T_unit  = arg_unit('T',  u.K,  kwargs)
     unit    = ret_unit({
