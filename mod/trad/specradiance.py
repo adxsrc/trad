@@ -34,10 +34,9 @@ respectively.
 
 
 from astropy import constants as c, units as u
-from jax.numpy import exp
 
 
-def blackbody(nu_unit=u.Hz, T_unit=u.K, unit=u.W/u.sr/u.m**2/u.Hz):
+def blackbody(nu_unit=u.Hz, T_unit=u.K, unit=u.W/u.sr/u.m**2/u.Hz, backend=None):
     r"""Planck's law
 
     Spectral density of electromagnetic radiation emitted by a black
@@ -55,6 +54,14 @@ def blackbody(nu_unit=u.Hz, T_unit=u.K, unit=u.W/u.sr/u.m**2/u.Hz):
     respectively.
 
     """
+
+    if backend is None:
+        import sys
+        if 'jax' in sys.modules:
+            import jax.numpy as backend
+        else:
+            import numpy as backend
+    exp = backend.exp
 
     A_v = float((2 * c.h * nu_unit**3) / (c.c**2 * u.sr) / unit)
     x_v = float((c.h * nu_unit) / (c.k_B * T_unit))
