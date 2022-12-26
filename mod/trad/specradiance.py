@@ -34,10 +34,10 @@ respectively.
 
 
 from astropy import constants as c, units as u
-from numpy   import exp
+from jax.numpy import exp
 
 
-def Bnu(nu, T):
+def blackbody(nu_unit=u.Hz, T_unit=u.K, unit=u.W/u.sr/u.m**2/u.Hz):
     r"""Planck's law
 
     Spectral density of electromagnetic radiation emitted by a black
@@ -55,7 +55,11 @@ def Bnu(nu, T):
     respectively.
 
     """
-    A = 2 * c.h  / (c.c*c.c) / u.sr
-    x = (c.h*nu) / (c.k_B*T)
-    B = A * (nu*nu*nu) / (exp(x) - 1)
-    return B.to(u.W / u.sr / (u.m*u.m) / u.Hz)
+
+    A_v = float((2 * c.h * nu_unit**3) / (c.c**2 * u.sr) / unit)
+    x_v = float((c.h * nu_unit) / (c.k_B * T_unit))
+    def B(nu, T):
+        return A_v * nu**3 / (exp(x_v * nu/T) - 1)
+
+    B.unit = unit
+    return B
