@@ -34,6 +34,7 @@ We will also use `scipy` for root finding and `matplotlib` for plotting.
 %load_ext autoreload
 %autoreload 2
 
+from math import pi
 import numpy as np
 
 from astropy        import constants as c, units as u
@@ -59,6 +60,13 @@ Rhigh  = 3                         # R_high parameter
 beta   = 1                         # plasma beta
 ```
 
+## Generate the Emissivity and Absorptivity
+
+```python
+jnu = emissivity  (u.Hz, u.cm**-3, 1, u.cgs.Gauss, 1)
+anu = absorptivity(u.Hz, u.cm**-3, 1, u.cgs.Gauss, 1)
+```
+
 ## The One Zone Model
 
 Using a uniform plasma ball with radius $R$, our one zone model leads to:
@@ -70,7 +78,7 @@ def B(ne):
     return ((2 * c.mu0 * c.k_B * ne * Te * (1 + Rhigh) / beta)**(1/2)).to(u.G)
 
 def Lnu(nu, ne):
-    P = jnu(nu, ne, Thetae, B(ne), theta) * (4 * pi * u.sr)
+    P = jnu(nu/u.Hz, ne/u.cm**-3, Thetae, B(ne)/u.cgs.Gauss, theta) * jnu.unit * (4 * pi * u.sr)
     V = (4/3) * pi * R**3
     return (P * V).to(u.erg / u.s / u.Hz)
 
@@ -79,7 +87,7 @@ def Fnu(nu, ne):
     return (Lnu(nu, ne) / S).to(u.Jy)
 
 def taunu(nu, ne):
-    return (R * anu(nu, ne, Thetae, B(ne), theta)).to(u.dimensionless_unscaled)
+    return (R * anu(nu/u.Hz, ne/u.cm**-3, Thetae, B(ne)/u.cgs.Gauss, theta) * anu.unit).to(u.dimensionless_unscaled)
 ```
 
 ## Sanity Check
