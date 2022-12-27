@@ -46,13 +46,17 @@ This is consistent with the usage in astrophysics literature nowadays.
 
 
 from astropy import constants as c, units as u
-from numpy   import pi, sqrt, exp, sin
-from scipy.special import kn
+from scipy.special import kn # jax does not support kn
+from phun import phun
 
+from .plasma       import gyrofrequency
 from .specradiance import blackbody
 
 
-def jnu(nu, ne, Thetae, B, theta):
+@phun({
+    'si': u.W / u.sr / u.m**3 / u.Hz,
+})
+def jnu(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     r"""Synchrotron emissivity
 
     An approximation of the synchrotron emissivity at given
@@ -81,16 +85,23 @@ def jnu(nu, ne, Thetae, B, theta):
     the electron cyclotron frequency, respectively.
 
     """
-    nuc = (c.si.e * B / (2 * pi * c.m_e)).to(u.Hz) # electron cyclotron frequency
-    nus = (2/9) * nuc * Thetae*Thetae * sin(theta) # synchrotron characteristic frequency
+    pi   = backend.pi
+    sqrt = backend.sqrt
+    exp  = backend.exp
+    sin  = backend.sin
+    nuc  = gyrofrequency(u_B)
 
-    A = sqrt(2) * (pi/3) * (c.cgs.e.gauss**2 / c.c) / u.sr
-    X = nu / nus
-    Y = (X**(1/2) + 2**(11/12) * X**(1/6))**2 * exp(-X**(1/3))
-    K = kn(2, 1/Thetae)
+    A = float(sqrt(2) * (pi/3) * (c.cgs.e.gauss**2/c.c/u.sr) * u_ne * nuc.unit / u_res)
+    x = float(1 * u_nu / nuc.unit)
 
-    J = A * (ne*nus) * (Y/K)
-    return J.to(u.W / u.sr / u.m**3 / u.Hz)
+    def jnu_pure(nu, ne, Thetae, B, theta):
+        nus = (2/9) * nuc(B) * Thetae*Thetae * sin(theta)
+        X = x * nu / nus
+        Y = (X**(1/2) + 2**(11/12) * X**(1/6))**2 * exp(-X**(1/3))
+        K = kn(2, 1/Thetae)
+        return A * (ne*nus) * (Y/K)
+
+    return jnu_pure
 
 
 def anu(nu, ne, Thetae, B, theta):
