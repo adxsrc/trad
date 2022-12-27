@@ -20,6 +20,9 @@ from astropy import constants as c, units as u
 from phun import phun
 
 
+Te = u.def_unit('Te', c.m_e * c.c**2 / c.k_B)
+
+
 @phun
 def gyrofrequency(u_B, u_res=u.Hz, backend=None):
     """Electron Cyclotron Frequency"""
