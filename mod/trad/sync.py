@@ -54,7 +54,8 @@ from .specradiance import blackbody
 
 
 @phun({
-    'si': u.W / u.sr / u.m**3 / u.Hz,
+    'si' : (u.W      ) / u.sr / u.m**3  / u.Hz,
+    'cgs': (u.erg/u.s) / u.sr / u.cm**3 / u.Hz,
 })
 def emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     r"""Synchrotron emissivity
@@ -105,7 +106,8 @@ def emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
 
 
 @phun({
-    'si': 1/u.m,
+    'si' : 1/u.m,
+    'cgs': 1/u.cm,
 })
 def absorptivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     r"""Synchrotron absorptivity"""
