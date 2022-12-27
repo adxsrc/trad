@@ -34,12 +34,17 @@ respectively.
 
 
 from astropy import constants as c, units as u
+from phun    import phun
 
 from .units  import *
 from .helper import *
 
 
-def blackbody(*args, backend=None, **kwargs):
+@phun({
+    'si' : (u.W      ) / u.sr / (u.m *u.m ) / u.Hz,
+    'cgs': (u.erg/u.s) / u.sr / (u.cm*u.cm) / u.Hz,
+})
+def blackbody(u_nu, u_T, u_res='si', backend=None):
     r"""Planck's law
 
     Spectral density of electromagnetic radiation emitted by a black
@@ -57,21 +62,6 @@ def blackbody(*args, backend=None, **kwargs):
     respectively.
 
     """
-
-    exp = get_backend(backend).exp
-
-    kwargs  = merge(['nu', 'T'], args, kwargs)
-    nu_unit = arg_unit('nu', u.Hz, kwargs)
-    T_unit  = arg_unit('T',  u.K,  kwargs)
-    unit    = ret_unit({
-        'si' : (u.W      ) / u.sr / (u.m *u.m ) / u.Hz,
-        'cgs': (u.erg/u.s) / u.sr / (u.cm*u.cm) / u.Hz,
-    }, 'si', kwargs)
-
-    a_v = float((2 * c.h * nu_unit**3) / (c.c**2 * u.sr) / unit)**(1/3)
-    x_v = float((c.h * nu_unit) / (c.k_B * T_unit))
-    def B(nu, T):
-        return (a_v * nu)**3 / (exp(x_v * nu/T) - 1)
-
-    B.unit = unit
-    return B
+    a = float((2 * c.h * u_nu**3) / (c.c**2 * u.sr) / u_res)**(1/3)
+    x = float((c.h * u_nu) / (c.k_B * u_T))
+    return lambda nu, T: (a*nu)**3 / (backend.exp(x*nu/T) - 1)
