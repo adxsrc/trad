@@ -49,7 +49,7 @@ from astropy import constants as c, units as u
 from scipy.special import kn # jax does not support kn
 from phun import phun
 
-from .plasma       import gyrofrequency
+from .plasma       import Te, gyrofrequency
 from .specradiance import blackbody
 
 
@@ -104,9 +104,13 @@ def jnu(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     return jnu_pure
 
 
-def anu(nu, ne, Thetae, B, theta):
+@phun({
+    'si': 1/u.m,
+})
+def anu(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     r"""Synchrotron absorptivity"""
-    T = (Thetae * c.m_e * c.c**2 / c.k_B).to(u.K)
-    Bnu = blackbody(nu, T)
-    a = jnu(nu, ne, Thetae, B, theta) / (Bnu() * Bnu.unit)
-    return a.to(1/u.m)
+
+    Bnu = blackbody(u_nu, Te)
+    j   = jnu(u_nu, u_ne, u_Thetae, u_B, u_theta)
+
+    return lambda nu, ne, Thetae, B, theta: j(nu, ne, Thetae, B, theta) / Bnu(nu, Thetae)
