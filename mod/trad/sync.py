@@ -56,7 +56,7 @@ from .specradiance import blackbody
 @phun({
     'si': u.W / u.sr / u.m**3 / u.Hz,
 })
-def jnu(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
+def emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     r"""Synchrotron emissivity
 
     An approximation of the synchrotron emissivity at given
@@ -107,10 +107,10 @@ def jnu(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
 @phun({
     'si': 1/u.m,
 })
-def anu(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
+def absorptivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     r"""Synchrotron absorptivity"""
 
     Bnu = blackbody(u_nu, Te)
-    j   = jnu(u_nu, u_ne, u_Thetae, u_B, u_theta)
+    jnu = emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta)
 
-    return lambda nu, ne, Thetae, B, theta: j(nu, ne, Thetae, B, theta) / Bnu(nu, Thetae)
+    return lambda nu, ne, Thetae, B, theta: jnu(nu, ne, Thetae, B, theta) / Bnu(nu, Thetae)
