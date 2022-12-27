@@ -49,7 +49,7 @@ from astropy import constants as c, units as u
 from numpy   import pi, sqrt, exp, sin
 from scipy.special import kn
 
-from .specradiance import Bnu
+from .specradiance import blackbody
 
 
 def jnu(nu, ne, Thetae, B, theta):
@@ -96,5 +96,6 @@ def jnu(nu, ne, Thetae, B, theta):
 def anu(nu, ne, Thetae, B, theta):
     r"""Synchrotron absorptivity"""
     T = (Thetae * c.m_e * c.c**2 / c.k_B).to(u.K)
-    a = jnu(nu, ne, Thetae, B, theta) / Bnu(nu, T)
+    Bnu = blackbody(nu, T)
+    a = jnu(nu, ne, Thetae, B, theta) / (Bnu() * Bnu.unit)
     return a.to(1/u.m)
