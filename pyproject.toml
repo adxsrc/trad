@@ -10,6 +10,7 @@ packages = [{include="trad", from="mod"}]
 python = "^3.8"
 numpy = "^1.22"
 astropy = "^5.0"
+phun = "^0.1.0"
 
 [tool.poetry.group.docs]
 optional = true
