@@ -1,3 +1,9 @@
+|PyPI|
+
+.. |PyPI| image:: https://github.com/adxsrc/trad/actions/workflows/python-publish.yml/badge.svg
+   :target: https://pypi.org/project/trad/
+
+
 |Trad|_: Composable Radiative Transfer
 ======================================
 
