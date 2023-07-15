@@ -62,13 +62,6 @@ Rhigh  = 3                         # R_high parameter
 beta   = 1                         # plasma beta
 ```
 
-## Generate the Emissivity and Absorptivity
-
-```python
-jnu = emissivity  (u.Hz, u.cm**-3, 1, u.cgs.Gauss, 1)
-anu = absorptivity(u.Hz, u.cm**-3, 1, u.cgs.Gauss, 1)
-```
-
 ## The One Zone Model
 
 Using a uniform plasma ball with radius $R$, our one zone model leads to:
@@ -117,14 +110,21 @@ def mktaunu(u_nu, u_ne, u_res=u.dimensionless_unscaled, backend=None):
     return pure
 ```
 
+```python
+B     = mkB(u.cm**-3)
+Lnu   = mkLnu(u.Hz, u.cm**-3)
+Fnu   = mkFnu(u.Hz, u.cm**-3)
+taunu = mktaunu(u.Hz, u.cm**-3)
+```
+
 ## Sanity Check
 
 We know $n_e \sim 10^6\,\mathrm{cm}^{-3}$.
 Check if this give reasonable magnetic field and flux.
 
 ```python
-nu = 230e9 * u.Hz    # observe frequency
-ne =   1e6 / u.cm**3 # make a first guess...
+nu = 230e9 # observe frequency
+ne =   1e6 # make a first guess...
 
 display(B(ne))
 display(Fnu(nu, ne))
@@ -135,9 +135,9 @@ display(Fnu(nu, ne))
 Really solve for $n_e$ using `scipy.optimize.root`.
 
 ```python
-Fnu_obs = 2.4 * u.Jy # target flux
+Fnu_obs = 2.4 # target flux in Jy
 
-r  = root(lambda ne: (Fnu(nu, ne/u.cm**3) - Fnu_obs).value, 1e6)
+r  = root(lambda ne: Fnu(nu, ne) - Fnu_obs, 1e6)
 x0 = r.x[0]
 
 display(r)
@@ -146,11 +146,11 @@ display(r)
 ## Display the Solution
 
 ```python
-ne = x0/u.cm**3 # solution
+ne = x0 # solution
 
 display(ne)
 display(B(ne))
-display(nu.to(u.Hz)*Lnu(nu, ne))
+display(nu * Lnu(nu, ne))
 display(Fnu(nu, ne))
 display(taunu(nu, ne))
 ```
@@ -160,7 +160,7 @@ display(taunu(nu, ne))
 Plot only the synchrotron SED for Sgr A*, assuming the electron number density is the 1/2 of the solved one, the solved one, and 2x the solved one.
 
 ```python
-nu_obs = np.logspace(8,16,num=65) * u.Hz
+nu_obs = np.logspace(8,16,num=65)
 
 fig, ax = plt.subplots(1,1,figsize=(8,8))
 
