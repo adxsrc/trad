@@ -95,14 +95,14 @@ def emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     A = float(sqrt(2) * (pi/3) * (c.cgs.e.gauss**2/c.c/u.sr) * u_ne * nuc.unit / u_res)
     x = float(1 * u_nu / nuc.unit)
 
-    def jnu_pure(nu, ne, Thetae, B, theta):
+    def pure(nu, ne, Thetae, B, theta):
         nus = (2/9) * nuc(B) * Thetae*Thetae * sin(theta)
         X = x * nu / nus
         Y = (X**(1/2) + 2**(11/12) * X**(1/6))**2 * exp(-X**(1/3))
         K = kn(2, 1/Thetae)
         return A * (ne*nus) * (Y/K)
 
-    return jnu_pure
+    return pure
 
 
 @phun({
@@ -115,4 +115,7 @@ def absorptivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     Bnu = blackbody(u_nu, Te)
     jnu = emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta)
 
-    return lambda nu, ne, Thetae, B, theta: jnu(nu, ne, Thetae, B, theta) / Bnu(nu, Thetae)
+    def pure(nu, ne, Thetae, B, theta):
+        return jnu(nu, ne, Thetae, B, theta) / Bnu(nu, Thetae)
+
+    return pure
