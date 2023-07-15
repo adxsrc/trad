@@ -28,7 +28,7 @@ def gyrofrequency(u_B, u_res=u.Hz, backend=None):
     """Electron Cyclotron Frequency"""
 
     with u.set_enabled_equivalencies([(u.Hz, u.cycle/u.s)]):
-        u_res = u_res.to(u.cycle/u.s)
+        u_res = (1.0 * u_res).to(u.cycle/u.s)
 
     s = float(u.rad * c.si.e * u_B / c.m_e / u_res)
 
