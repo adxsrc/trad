@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "trad"
-version = "0.1.0"
+version = "0.1.1"
 description = "Composable Radiative Transfer"
 authors = ["Chi-kwan Chan <chanc@arizona.edu>"]
 readme = "README.rst"
