@@ -13,18 +13,19 @@
 # limitations under the License.
 
 
-"""Unit tests for `trad.plasma`"""
+"""Unit tests for `trad.blackbody`"""
 
+
+from math import isclose
+from astropy import units as u
 
 from trad.specradiance import blackbody
-
-from astropy import units as u
 
 
 def test_gyrofrequency():
 
     B = blackbody(u.Hz, u.K)
-    assert B(230e9, 1e10) == 1.6252775614257738e-07
+    assert isclose(B(230e9, 1e10), 1.62527756142577e-07)
 
     B = blackbody(u.GHz, u.K)
-    assert B(230, 1e10) == 1.6252775614257677e-07
+    assert isclose(B(230, 1e10),   1.62527756142577e-07)

@@ -16,15 +16,16 @@
 """Unit tests for `trad.plasma`"""
 
 
-from trad.plasma import gyrofrequency
-
+from math import isclose
 from astropy import units as u
+
+from trad.plasma import gyrofrequency
 
 
 def test_gyrofrequency():
 
     fe = gyrofrequency(u.T)
-    assert fe(1.0) == 27992489872.33304
+    assert isclose(fe(1.0), 27992489872.33304)
 
     fe = gyrofrequency(u.T, u_res=u.rad/u.s)
-    assert fe(1.0) == 175882001077.2163
+    assert isclose(fe(1.0), 175882001077.2163)
