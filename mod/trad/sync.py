@@ -49,7 +49,7 @@ from astropy import constants as c, units as u
 from scipy.special import kn # jax does not support kn
 from phun import phun
 
-from .plasma       import Te as u_Terestmass, gyrofrequency
+from .plasma       import u_T_me, gyrofrequency
 from .specradiance import blackbody
 
 
@@ -93,7 +93,7 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
     nuc  = gyrofrequency(u_B)
 
     r = float(u_theta.to(u.rad))
-    t = float(u_Terestmass.to(u_Te))
+    t = float(u_T_me.to(u_Te))
 
     s = float((2/9) / t**2)
     A = float(sqrt(2) * (pi/3) * (c.cgs.e.gauss**2/c.c/u.sr) * u_ne * nuc.unit / u_res)

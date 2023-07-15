@@ -42,8 +42,8 @@ from scipy.optimize import root
 from matplotlib     import pyplot as plt
 
 from phun import phun
-from trad.plasma import Te as u_Te
-from trad.sync import *
+from trad.plasma import u_T_me
+from trad.sync   import *
 ```
 
 ## Standard Assumptions
@@ -57,7 +57,7 @@ R     = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone m
 D     = 8127   * u.pc             # distance to black hole
 
 theta = pi / 3                    # angle between magnetic field and line of sight
-Te    = 10                        # dimensionless electron tempearture
+Te    = 10                        # electron tempearture in unit of electron rest mass energy
 Rhigh = 3                         # R_high parameter
 beta  = 1                         # plasma beta
 ```
@@ -69,7 +69,7 @@ Using a uniform plasma ball with radius $R$, our one zone model leads to:
 ```python
 @phun
 def mkB(u_ne, u_res=u.G, backend=None):
-    s = float((2 * c.mu0 * c.k_B * u_ne * u_Te * (1 + Rhigh) / beta)**(1/2) / u_res)
+    s = float((2 * c.mu0 * c.k_B * u_ne * u_T_me * (1 + Rhigh) / beta)**(1/2) / u_res)
     def pure(ne):
         return (ne * Te)**(1/2) * s
     return pure
@@ -77,7 +77,7 @@ def mkB(u_ne, u_res=u.G, backend=None):
 @phun
 def mkLnu(u_nu, u_ne, u_res=u.erg/u.s/u.Hz, backend=None):
     B   = mkB(u_ne)
-    jnu = emissivity(u_nu, u_ne, u_Te, B.unit, u.rad)
+    jnu = emissivity(u_nu, u_ne, u_T_me, B.unit, u.rad)
     V   = (4/3) * pi * R**3
     s   = float((4 * pi * u.sr) * V * jnu.unit / u_res)
 
@@ -100,7 +100,7 @@ def mkFnu(u_nu, u_ne, u_res=u.Jy, backend=None):
 @phun
 def mktaunu(u_nu, u_ne, u_res=u.dimensionless_unscaled, backend=None):
     B   = mkB(u_ne)
-    anu = absorptivity(u_nu, u_ne, u_Te, B.unit, u.rad)
+    anu = absorptivity(u_nu, u_ne, u_T_me, B.unit, u.rad)
     s   = float(R * anu.unit / u_res)
 
     def pure(nu, ne):

@@ -20,7 +20,7 @@ from astropy import constants as c, units as u
 from phun import phun
 
 
-Te = u.def_unit('Te', c.m_e * c.c**2 / c.k_B)
+u_T_me = u.def_unit('T_me', c.m_e * c.c**2 / c.k_B)
 
 
 @phun
