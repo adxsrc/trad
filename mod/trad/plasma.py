@@ -27,5 +27,9 @@ Te = u.def_unit('Te', c.m_e * c.c**2 / c.k_B)
 def gyrofrequency(u_B, u_res=u.Hz, backend=None):
     """Electron Cyclotron Frequency"""
 
-    s = float(c.si.e * u_B / (2 * backend.pi * c.m_e) / u_res)
+    with u.set_enabled_equivalencies([(u.Hz, u.cycle/u.s)]):
+        u_res = u_res.to(u.cycle/u.s)
+
+    s = float(u.rad * c.si.e * u_B / c.m_e / u_res)
+
     return lambda B: s * B
