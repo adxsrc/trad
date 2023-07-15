@@ -105,8 +105,16 @@ def mkFnu(u_nu, u_ne, u_res=u.Jy, backend=None):
 
     return pure
 
-def taunu(nu, ne):
-    return (R * anu(nu/u.Hz, ne/u.cm**-3, Thetae, B(ne)/u.cgs.Gauss, theta) * anu.unit).to(u.dimensionless_unscaled)
+@phun
+def mktaunu(u_nu, u_ne, u_res=u.dimensionless_unscaled, backend=None):
+    B   = mkB(u_ne)
+    anu = absorptivity(u_nu, u_ne, 1, B.unit, 1)
+    s   = float(R * anu.unit / u_res)
+
+    def pure(nu, ne):
+        return s * anu(nu, ne, Thetae, B(ne), theta)
+
+    return pure
 ```
 
 ## Sanity Check
