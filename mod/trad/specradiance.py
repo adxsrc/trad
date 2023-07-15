@@ -36,7 +36,6 @@ respectively.
 from astropy import constants as c, units as u
 from phun    import phun
 
-from .units  import *
 from .helper import *
 
 
