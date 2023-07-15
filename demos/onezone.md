@@ -52,14 +52,14 @@ We set the standard parameters.
 Note that we skip setting the electron number density $n_e$, because that is the parameter we need to fit.
 
 ```python
-M      = 4.14e6 * c.M_sun          # black hole mass
-R      = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone model
-D      = 8127   * u.pc             # distance to black hole
+M     = 4.14e6 * c.M_sun          # black hole mass
+R     = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone model
+D     = 8127   * u.pc             # distance to black hole
 
-theta  = pi / 3                    # angle between magnetic field and line of sight
-Thetae = 10                        # dimensionless electron tempearture
-Rhigh  = 3                         # R_high parameter
-beta   = 1                         # plasma beta
+theta = pi / 3                    # angle between magnetic field and line of sight
+Te    = 10                        # dimensionless electron tempearture
+Rhigh = 3                         # R_high parameter
+beta  = 1                         # plasma beta
 ```
 
 ## The One Zone Model
@@ -71,19 +71,18 @@ Using a uniform plasma ball with radius $R$, our one zone model leads to:
 def mkB(u_ne, u_res=u.G, backend=None):
     s = float((2 * c.mu0 * c.k_B * u_ne * u_Te * (1 + Rhigh) / beta)**(1/2) / u_res)
     def pure(ne):
-        return (ne * Thetae)**(1/2) * s
+        return (ne * Te)**(1/2) * s
     return pure
 
 @phun
 def mkLnu(u_nu, u_ne, u_res=u.erg/u.s/u.Hz, backend=None):
     B   = mkB(u_ne)
-    jnu = emissivity(u_nu, u_ne, 1, B.unit, 1)
+    jnu = emissivity(u_nu, u_ne, u_Te, B.unit, u.rad)
     V   = (4/3) * pi * R**3
     s   = float((4 * pi * u.sr) * V * jnu.unit / u_res)
 
     def pure(nu, ne):
-        j = jnu(nu, ne, Thetae, B(ne), theta)
-        return s * j
+        return s * jnu(nu, ne, Te, B(ne), theta)
 
     return pure
 
@@ -101,11 +100,11 @@ def mkFnu(u_nu, u_ne, u_res=u.Jy, backend=None):
 @phun
 def mktaunu(u_nu, u_ne, u_res=u.dimensionless_unscaled, backend=None):
     B   = mkB(u_ne)
-    anu = absorptivity(u_nu, u_ne, 1, B.unit, 1)
+    anu = absorptivity(u_nu, u_ne, u_Te, B.unit, u.rad)
     s   = float(R * anu.unit / u_res)
 
     def pure(nu, ne):
-        return s * anu(nu, ne, Thetae, B(ne), theta)
+        return s * anu(nu, ne, Te, B(ne), theta)
 
     return pure
 ```
