@@ -32,4 +32,7 @@ def gyrofrequency(u_B, u_res=u.Hz, backend=None):
 
     s = float(u.rad * c.si.e * u_B / c.m_e / u_res)
 
-    return lambda B: s * B
+    def pure(B):
+        return s * B
+
+    return pure
