@@ -56,7 +56,7 @@ M      = 4.14e6 * c.M_sun          # black hole mass
 R      = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone model
 D      = 8127   * u.pc             # distance to black hole
 
-theta  = pi / 3 * u.rad            # angle between magnetic field and line of sight
+theta  = pi / 3                    # angle between magnetic field and line of sight
 Thetae = 10                        # dimensionless electron tempearture
 Rhigh  = 3                         # R_high parameter
 beta   = 1                         # plasma beta
@@ -81,10 +81,18 @@ def mkB(u_ne, u_res=u.G, backend=None):
         return (ne * Thetae)**(1/2) * s
     return pure
 
-def Lnu(nu, ne):
-    P = jnu(nu/u.Hz, ne/u.cm**-3, Thetae, B(ne)/u.cgs.Gauss, theta) * jnu.unit * (4 * pi * u.sr)
-    V = (4/3) * pi * R**3
-    return (P * V).to(u.erg / u.s / u.Hz)
+@phun
+def mkLnu(u_nu, u_ne, u_res=u.erg/u.s/u.Hz, backend=None):
+    B   = mkB(u_ne)
+    jnu = emissivity(u_nu, u_ne, 1, B.unit, 1)
+    V   = (4/3) * pi * R**3
+    s   = float((4 * pi * u.sr) * V * jnu.unit / u_res)
+
+    def pure(nu, ne):
+        j = jnu(nu, ne, Thetae, B(ne), theta)
+        return s * j
+
+    return pure
 
 def Fnu(nu, ne):
     S = 4 * pi * D * D
