@@ -29,3 +29,9 @@ def test_gyrofrequency():
 
     fe = gyrofrequency(u.T, u_res=u.rad/u.s)
     assert isclose(fe(1.0), 175882001077.2163)
+
+    fe = gyrofrequency(u.Gauss)
+    assert isclose(fe(1.0), 2799248.9872333035)
+
+    fe = gyrofrequency(u.Gauss, u_res=u.rad/u.s)
+    assert isclose(fe(1.0), 17588200.10772163)
