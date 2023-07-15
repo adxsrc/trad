@@ -25,7 +25,7 @@ This notebook can be modified to perfrom one-zone model estimates for other AGNs
 ## Autoreload and Import Modules
 
 To streamline the development of `trad`, we enable the autoreload `ipython` extension.
-This makes any changes to `trad` code automatically available in this notebook. 
+This makes any changes to `trad` code automatically available in this notebook.
 
 We first input the necessary `python` modules.  Just like `trad`, we use `astropy`'s unit and constant modules.
 We will also use `scipy` for root finding and `matplotlib` for plotting.
@@ -41,6 +41,8 @@ from astropy        import constants as c, units as u
 from scipy.optimize import root
 from matplotlib     import pyplot as plt
 
+from phun import phun
+from trad.plasma import Te as u_Te
 from trad.sync import *
 ```
 
@@ -51,7 +53,7 @@ Note that we skip setting the electron number density $n_e$, because that is the
 
 ```python
 M      = 4.14e6 * c.M_sun          # black hole mass
-R      = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone model 
+R      = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone model
 D      = 8127   * u.pc             # distance to black hole
 
 theta  = pi / 3 * u.rad            # angle between magnetic field and line of sight
@@ -72,10 +74,12 @@ anu = absorptivity(u.Hz, u.cm**-3, 1, u.cgs.Gauss, 1)
 Using a uniform plasma ball with radius $R$, our one zone model leads to:
 
 ```python
-def B(ne):
-    "Magnetic field strength in G"
-    Te = (c.m_e * c.c**2 * Thetae / c.k_B).to(u.K)
-    return ((2 * c.mu0 * c.k_B * ne * Te * (1 + Rhigh) / beta)**(1/2)).to(u.G)
+@phun
+def mkB(u_ne, u_res=u.G, backend=None):
+    s = float((2 * c.mu0 * c.k_B * u_ne * u_Te * (1 + Rhigh) / beta)**(1/2) / u_res)
+    def pure(ne):
+        return (ne * Thetae)**(1/2) * s
+    return pure
 
 def Lnu(nu, ne):
     P = jnu(nu/u.Hz, ne/u.cm**-3, Thetae, B(ne)/u.cgs.Gauss, theta) * jnu.unit * (4 * pi * u.sr)
