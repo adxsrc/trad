@@ -49,7 +49,7 @@ from astropy import constants as c, units as u
 from scipy.special import kn # jax does not support kn
 from phun import phun
 
-from .plasma       import Te, gyrofrequency
+from .plasma       import Te as u_Terestmass, gyrofrequency
 from .specradiance import blackbody
 
 
@@ -57,7 +57,7 @@ from .specradiance import blackbody
     'si' : (u.W      ) / u.sr / u.m**3  / u.Hz,
     'cgs': (u.erg/u.s) / u.sr / u.cm**3 / u.Hz,
 })
-def emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
+def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
     r"""Synchrotron emissivity
 
     An approximation of the synchrotron emissivity at given
@@ -92,14 +92,18 @@ def emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     sin  = backend.sin
     nuc  = gyrofrequency(u_B)
 
+    r = float(u_theta.to(u.rad))
+    t = float(u_Terestmass.to(u_Te))
+
+    s = float((2/9) / t**2)
     A = float(sqrt(2) * (pi/3) * (c.cgs.e.gauss**2/c.c/u.sr) * u_ne * nuc.unit / u_res)
     x = float(1 * u_nu / nuc.unit)
 
-    def pure(nu, ne, Thetae, B, theta):
-        nus = (2/9) * nuc(B) * Thetae*Thetae * sin(theta)
+    def pure(nu, ne, Te, B, theta):
+        nus = s * Te**2 * nuc(B) * sin(theta * r)
         X = x * nu / nus
         Y = (X**(1/2) + 2**(11/12) * X**(1/6))**2 * exp(-X**(1/3))
-        K = kn(2, 1/Thetae)
+        K = kn(2, t/Te)
         return A * (ne*nus) * (Y/K)
 
     return pure
@@ -109,13 +113,13 @@ def emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
     'si' : 1/u.m,
     'cgs': 1/u.cm,
 })
-def absorptivity(u_nu, u_ne, u_Thetae, u_B, u_theta, u_res='si', backend=None):
+def absorptivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
     r"""Synchrotron absorptivity"""
 
-    Bnu = blackbody(u_nu, Te)
-    jnu = emissivity(u_nu, u_ne, u_Thetae, u_B, u_theta)
+    Bnu = blackbody(u_nu, u_Te)
+    jnu = emissivity(u_nu, u_ne, u_Te, u_B, u_theta)
 
-    def pure(nu, ne, Thetae, B, theta):
-        return jnu(nu, ne, Thetae, B, theta) / Bnu(nu, Thetae)
+    def pure(nu, ne, Te, B, theta):
+        return jnu(nu, ne, Te, B, theta) / Bnu(nu, Te)
 
     return pure
