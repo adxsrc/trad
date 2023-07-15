@@ -94,9 +94,16 @@ def mkLnu(u_nu, u_ne, u_res=u.erg/u.s/u.Hz, backend=None):
 
     return pure
 
-def Fnu(nu, ne):
-    S = 4 * pi * D * D
-    return (Lnu(nu, ne) / S).to(u.Jy)
+@phun
+def mkFnu(u_nu, u_ne, u_res=u.Jy, backend=None):
+    Lnu = mkLnu(u_nu, u_ne)
+    S   = 4 * pi * D * D
+    s   = float(Lnu.unit / S / u_res)
+
+    def pure(nu, ne):
+        return s * Lnu(nu, ne)
+
+    return pure
 
 def taunu(nu, ne):
     return (R * anu(nu/u.Hz, ne/u.cm**-3, Thetae, B(ne)/u.cgs.Gauss, theta) * anu.unit).to(u.dimensionless_unscaled)
