@@ -25,3 +25,6 @@ def test_gyrofrequency():
 
     fe = gyrofrequency(u.T)
     assert fe(1.0) == 27992489872.33304
+
+    fe = gyrofrequency(u.T, u_res=u.rad/u.s)
+    assert fe(1.0) == 175882001077.2163
