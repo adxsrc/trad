@@ -17,8 +17,7 @@ from astropy import constants as c, units as u
 from scipy.special import kn # jax does not support kn
 from phun import phun
 
-from ..plasma       import u_T_me, gyrofrequency
-from ..specradiance import blackbody
+from ..plasma import u_T_me, gyrofrequency
 
 
 @phun({
