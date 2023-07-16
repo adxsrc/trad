@@ -6,3 +6,6 @@ API
 
 .. automodule:: trad.sync.Leung2011
    :members:
+
+.. automodule:: trad.sync.Dexter2016
+   :members:
