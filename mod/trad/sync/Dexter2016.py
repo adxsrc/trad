@@ -77,19 +77,3 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
         return A * (ne * nu/Te**2) * I
 
     return pure
-
-
-@phun({
-    'si' : 1/u.m,
-    'cgs': 1/u.cm,
-})
-def absorptivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
-    r"""Synchrotron absorptivity"""
-
-    Bnu = blackbody(u_nu, u_Te)
-    jnu = emissivity(u_nu, u_ne, u_Te, u_B, u_theta)
-
-    def pure(nu, ne, Te, B, theta):
-        return jnu(nu, ne, Te, B, theta) / Bnu(nu, Te)
-
-    return pure
