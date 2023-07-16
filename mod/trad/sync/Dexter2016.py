@@ -57,23 +57,31 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
         2.5651(1 + 1.92 X^{-1/3} + 0.9977 X^{-2/3}) \exp(-1.8899 X^{1/3}).
 
     """
-    pi   = backend.pi
     sqrt = backend.sqrt
     exp  = backend.exp
     sin  = backend.sin
+    tan  = backend.tan
     nuB  = gyrofrequency(u_B)
 
     r = float(u_theta.to(u.rad))
     t = float(u_T_me.to(u_Te))
 
-    s = float(1.5 / t**2)
-    A = float((0.5 / sqrt(3)) * (c.cgs.e.gauss**2/c.c/u.sr) * u_ne * u_nu / u_res) * t**2
-    x = float(1 * u_nu / nuB.unit)
+    s1 = float(1.5 / t**2)
+    s2 = float(t   / 0.75)
+    A  = float((0.5 / sqrt(3)) * (c.cgs.e.gauss**2/c.c/u.sr) * u_ne * u_nu / u_res) * t**2
+    x  = float(1 * u_nu / nuB.unit)
 
     def pure(nu, ne, Te, B, theta):
-        nuc = s * Te**2 * nuB(B) * sin(theta * r)
-        X = x * nu / nuc
-        I = 2.5651 * (1 + 1.92*X**(-1/3) + 0.9977*X**(-2/3)) * exp(-1.8899*X**(1/3))
-        return A * (ne * nu/Te**2) * I
+        nuc = s1 * Te**2 * nuB(B) * sin(theta * r)
+        X   = x * nu / nuc
+        s3  = A * (ne * nu/Te**2) * exp(-1.8899*X**(1/3))
+        II  = 2.5651 * (1 + 1.92 *X**(-1/3) + 0.9977*X**(-2/3))
+        IQ  = 2.5651 * (1 + 0.932*X**(-1/3) + 0.4998*X**(-2/3))
+        IV  = (1.8138*X**(-1) + 3.423*X**(-2/3) + 0.02955*X**(-1/2) + 2.0377*X**(-1/3))
+        return (
+            s3 * II,
+            s3 * IQ,
+            s3 * IV * s2 / (Te * tan(theta * r))
+        )
 
     return pure
