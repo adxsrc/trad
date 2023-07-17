@@ -29,7 +29,8 @@ We will also use `matplotlib` for plotting.
 %autoreload 2
 
 from math import pi
-import numpy as np
+from jax import jit
+from jax import numpy as np
 from astropy import constants as c, units as u
 from matplotlib import pyplot as plt
 
@@ -38,33 +39,41 @@ from trad.sync import Dexter2016 as D16
 from trad.sync import Leung2011  as L11
 ```
 
-## Test Implementation
-
-```python
-Te = float(1e11*u.K/u_T_me)
-
-display(Te)
-display(L11.emissivity(230e9*u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.G, 60*u.deg)())
-display(L11.emissivity(230e9*u.Hz, 1e7*u.cm**-3, u_T_me,   10*u.G, 60*u.deg)(Te))
-```
-
 ## Create Emissivity vs Frequency functions
 
 ```python
-eL11 = L11.emissivity(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg)
-eD16 = D16.emissivity(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg)
+eL11_org = L11.emissivity(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg)
+eD16_org = D16.emissivity(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg)
+
+eL11_jit = jit(eL11_org)
+eD16_jit = jit(eD16_org)
 ```
 
 ## Plot
 
 ```python
 nu_obs = np.logspace(8,16,num=65)
-eL11_obs = eL11(nu_obs)
-eD16_obs = eD16(nu_obs)
+
+eL11_obs     = eL11_jit(nu_obs)
+eD16_obs, *_ = eD16_jit(nu_obs)
 
 fig, ax = plt.subplots(1,1,figsize=(8,8))
 ax.loglog(nu_obs, eL11_obs)
 ax.loglog(nu_obs, eD16_obs, '--')
 ax.set_xlim(1e8, 1e16)
 ax.set_ylim(1e-25,1e-15)
+```
+
+## Test JAX and Performance
+
+Time the original and jitted version of the code.  The jitted version is about 40x faster!!!
+
+```python
+%timeit eL11_obs = eL11_org(nu_obs)
+%timeit eL11_obs = eL11_jit(nu_obs)
+```
+
+```python
+%timeit eD16_obs = eD16_org(nu_obs)
+%timeit eD16_obs = eD16_jit(nu_obs)
 ```
