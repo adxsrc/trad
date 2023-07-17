@@ -109,14 +109,44 @@ def absorptivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=F
     Bnu = blackbody(u_nu, u_Te)
     jnu = emissivity(u_nu, u_ne, u_Te, u_B, u_theta, pol=pol)
 
-    def pure(nu, ne, Te, B, theta):
-        j = jnu(nu, ne, Te, B, theta)
-        B = Bnu(nu, Te)
-        return j / B
+    if not pol:
+        def pure(nu, ne, Te, B, theta):
+            j = jnu(nu, ne, Te, B, theta)
+            B = Bnu(nu, Te)
+            return j / B
+        return pure
+
+    exp = backend.exp
+    log = backend.log
+    sin = backend.sin
+    cos = backend.cos
+    nuB = gyrofrequency(u_B)
+
+    r = float(u_theta.to(u.rad))
+    t = float(u_T_me.to(u_Te))
+
+    s1 = float(1.5 / t**2)
+    A  = float((u_ne * c.cgs.e.gauss**2 * nuB.unit**2) / (c.m_e * c.c * u_nu**3) / u_res)
 
     def purepol(nu, ne, Te, B, theta):
         j = jnu(nu, ne, Te, B, theta)
         B = Bnu(nu, Te)
-        return tuple(jS / B for jS in j)
 
-    return purepol if pol else pure
+        nuc = s1 * Te**2 * nuB(B) * sin(theta * r)
+        X = (1.5e-3/2**(1/2) * nu/nuc)**(-1/2)
+        f = 2.011 * exp(-X**1.035/4.7) - cos(X/2) * exp(-X**1.2/2.73) - 0.011 * exp(-X/47.2)
+        g = 1 - 0.11 * log(1 + 0.035 * X)
+
+        T  = Te * u_Te / u_T_me
+        iT = 1 / T
+
+        K0 = kn(0, t/Te)
+        K1 = kn(1, t/Te)
+        K2 = kn(2, t/Te)
+
+        rhoQ =     A * (ne / nu**3) * sin(theta * r)**2 * f * (K0 / K2 + 6 * T)
+        rhoV = 2 * A * (ne / nu**2) * cos(theta * r)    * g * (K1 / K2)
+
+        return tuple(jS / B for jS in j) + (rhoQ, rhoV)
+
+    return purepol
