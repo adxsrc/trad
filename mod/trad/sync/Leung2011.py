@@ -84,13 +84,20 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=Fal
     'si' : 1/u.m,
     'cgs': 1/u.cm,
 })
-def absorptivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
+def absorptivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=False):
     r"""Synchrotron absorptivity"""
 
     Bnu = blackbody(u_nu, u_Te)
-    jnu = emissivity(u_nu, u_ne, u_Te, u_B, u_theta)
+    jnu = emissivity(u_nu, u_ne, u_Te, u_B, u_theta, pol=pol)
 
     def pure(nu, ne, Te, B, theta):
-        return jnu(nu, ne, Te, B, theta) / Bnu(nu, Te)
+        j = jnu(nu, ne, Te, B, theta)
+        B = Bnu(nu, Te)
+        return j / B
 
-    return pure
+    def purepol(nu, ne, Te, B, theta):
+        j = jnu(nu, ne, Te, B, theta)
+        B = Bnu(nu, Te)
+        return tuple(jS / B for jS in j)
+
+    return purepol if pol else pure
