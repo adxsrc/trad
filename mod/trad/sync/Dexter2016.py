@@ -70,16 +70,20 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
     x  = float(1 * u_nu / nuB.unit)
 
     def pure(nu, ne, Te, B, theta):
-        nuc = s1 * Te**2 * nuB(B) * sin(theta * r)
-        X   = x * nu / nuc
-        s3  = A * (ne * nu/Te**2) * exp(-1.8899*X**(1/3))
-        II  = 2.5651 * (1 + 1.92 *X**(-1/3) + 0.9977*X**(-2/3))
-        IQ  = 2.5651 * (1 + 0.932*X**(-1/3) + 0.4998*X**(-2/3))
-        IV  = (1.8138*X**(-1) + 3.423*X**(-2/3) + 0.02955*X**(-1/2) + 2.0377*X**(-1/3))
+        nuc  = s1 * Te**2 * nuB(B) * sin(theta * r)
+        iX   = nuc / (x * nu)
+        iX16 = iX**(1/6)
+        iX13 = iX16*iX16
+        iX12 = iX13*iX16
+        iX23 = iX13*iX13
+        s3  = A * (ne * nu/Te**2) * exp(-1.8899/iX13)
+        fI  = 2.5651 + 4.9250*iX13 + 2.5592*iX23
+        fQ  = 2.5651 + 2.3907*iX13 + 1.2820*iX23
+        fV  = 1.8138*iX + 3.4230*iX23 + 0.02955*iX12 + 2.0377*iX13
         return (
-            s3 * II,
-            s3 * IQ,
-            s3 * IV * s2 / (Te * tan(theta * r))
+            s3 * fI,
+            s3 * fQ,
+            s3 * fV * s2 / (Te * tan(theta * r)),
         )
 
     return pure
