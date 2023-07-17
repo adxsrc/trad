@@ -56,18 +56,17 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
         2.5651(1 + 1.92 X^{-1/3} + 0.9977 X^{-2/3}) \exp(-1.8899 X^{1/3}).
 
     """
-    sqrt = backend.sqrt
-    exp  = backend.exp
-    sin  = backend.sin
-    tan  = backend.tan
-    nuB  = gyrofrequency(u_B)
+    exp = backend.exp
+    sin = backend.sin
+    tan = backend.tan
+    nuB = gyrofrequency(u_B)
 
     r = float(u_theta.to(u.rad))
     t = float(u_T_me.to(u_Te))
 
     s1 = float(1.5 / t**2)
     s2 = float(t   / 0.75)
-    A  = float((0.5 / sqrt(3)) * (c.cgs.e.gauss**2/c.c/u.sr) * u_ne * u_nu / u_res) * t**2
+    A  = float((0.5 / 3**0.5) * (c.cgs.e.gauss**2/c.c/u.sr) * u_ne * u_nu / u_res) * t**2
     x  = float(1 * u_nu / nuB.unit)
 
     def pure(nu, ne, Te, B, theta):
