@@ -24,7 +24,7 @@ from ..plasma import u_T_me, gyrofrequency
     'si' : (u.W      ) / u.sr / u.m**3  / u.Hz,
     'cgs': (u.erg/u.s) / u.sr / u.cm**3 / u.Hz,
 })
-def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
+def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=False):
     r"""Synchrotron emissivity
 
     An approximation of the synchrotron emissivity at given
@@ -53,6 +53,10 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
     the electron cyclotron frequency, respectively.
 
     """
+    if pol:
+        raise NotImplementedError(
+            "`Leung2011` does not implement polarized emissivities")
+
     pi  = backend.pi
     exp = backend.exp
     sin = backend.sin

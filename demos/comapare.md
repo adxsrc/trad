@@ -54,8 +54,8 @@ eD16_jit = jit(eD16_org)
 ```python
 nu_obs = np.logspace(8,16,num=65)
 
-eL11_obs     = eL11_jit(nu_obs)
-eD16_obs, *_ = eD16_jit(nu_obs)
+eL11_obs = eL11_jit(nu_obs)
+eD16_obs = eD16_jit(nu_obs)
 
 fig, ax = plt.subplots(1,1,figsize=(8,8))
 ax.loglog(nu_obs, eL11_obs)

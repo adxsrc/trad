@@ -24,7 +24,7 @@ from ..plasma import u_T_me, gyrofrequency
     'si' : (u.W      ) / u.sr / u.m**3  / u.Hz,
     'cgs': (u.erg/u.s) / u.sr / u.cm**3 / u.Hz,
 })
-def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
+def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=False):
     r"""Synchrotron emissivity
 
     An approximation of the synchrotron emissivity at given
@@ -72,6 +72,15 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
     def pure(nu, ne, Te, B, theta):
         nuc  = s1 * Te**2 * nuB(B) * sin(theta * r)
         iX   = nuc / (x * nu)
+        iX13 = iX**(1/3)
+        iX23 = iX13*iX13
+        s3  = A * (ne * nu/Te**2) * exp(-1.8899/iX13)
+        fI  = 2.5651 + 4.9250*iX13 + 2.5592*iX23
+        return s3 * fI
+
+    def purepol(nu, ne, Te, B, theta):
+        nuc  = s1 * Te**2 * nuB(B) * sin(theta * r)
+        iX   = nuc / (x * nu)
         iX16 = iX**(1/6)
         iX13 = iX16*iX16
         iX12 = iX13*iX16
@@ -86,4 +95,4 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
             s3 * fV * s2 / (Te * tan(theta * r)),
         )
 
-    return pure
+    return purepol if pol else pure
