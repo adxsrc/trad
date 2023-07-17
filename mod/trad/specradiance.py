@@ -65,6 +65,6 @@ def blackbody(u_nu, u_T, u_res='si', backend=None):
     x = float((c.h * u_nu) / (c.k_B * u_T))
 
     def pure(nu, T):
-        return (a*nu)**3 / (backend.exp(x*nu/T) - 1)
+        return (a*nu)**3 / backend.expm1(x*nu/T)
 
     return pure
