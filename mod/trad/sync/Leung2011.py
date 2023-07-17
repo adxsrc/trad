@@ -17,7 +17,8 @@ from astropy import constants as c, units as u
 from scipy.special import kn # jax does not support kn
 from phun import phun
 
-from ..plasma import u_T_me, gyrofrequency
+from ..plasma       import u_T_me, gyrofrequency
+from ..specradiance import blackbody
 
 
 @phun({
@@ -75,5 +76,21 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=Fal
         Y = (X**(1/2) + 2**(11/12) * X**(1/6))**2 * exp(-X**(1/3))
         K = kn(2, t/Te)
         return A * (ne*nus) * (Y/K)
+
+    return pure
+
+
+@phun({
+    'si' : 1/u.m,
+    'cgs': 1/u.cm,
+})
+def absorptivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
+    r"""Synchrotron absorptivity"""
+
+    Bnu = blackbody(u_nu, u_Te)
+    jnu = emissivity(u_nu, u_ne, u_Te, u_B, u_theta)
+
+    def pure(nu, ne, Te, B, theta):
+        return jnu(nu, ne, Te, B, theta) / Bnu(nu, Te)
 
     return pure

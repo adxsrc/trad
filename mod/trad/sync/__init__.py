@@ -45,29 +45,4 @@ This is consistent with the usage in astrophysics literature nowadays.
 """
 
 
-from astropy import units as u
-from phun import phun
-
-from .Dexter2016    import emissivity # TODO: dynamically choose which implementation
-from ..specradiance import blackbody
-
-
-@phun({
-    'si' : 1/u.m,
-    'cgs': 1/u.cm,
-})
-def absorptivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
-    r"""Synchrotron absorptivity"""
-
-    Bnu = blackbody(u_nu, u_Te)
-    jnu = emissivity(u_nu, u_ne, u_Te, u_B, u_theta)
-
-    def pure(nu, ne, Te, B, theta):
-        j = jnu(nu, ne, Te, B, theta)
-        B = Bnu(nu, Te)
-        if isinstance(j, tuple):
-            return tuple(jS / B for jS in j)
-        else:
-            return j / B
-
-    return pure
+from .Dexter2016 import * # TODO: dynamically choose which implementation

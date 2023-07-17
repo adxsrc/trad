@@ -18,6 +18,7 @@ from scipy.special import kn # jax does not support kn
 from phun import phun
 
 from ..plasma import u_T_me, gyrofrequency
+from ..specradiance import blackbody
 
 
 @phun({
@@ -96,3 +97,24 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=Fal
         )
 
     return purepol if pol else pure
+
+
+@phun({
+    'si' : 1/u.m,
+    'cgs': 1/u.cm,
+})
+def absorptivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None):
+    r"""Synchrotron absorptivity"""
+
+    Bnu = blackbody(u_nu, u_Te)
+    jnu = emissivity(u_nu, u_ne, u_Te, u_B, u_theta)
+
+    def pure(nu, ne, Te, B, theta):
+        j = jnu(nu, ne, Te, B, theta)
+        B = Bnu(nu, Te)
+        if isinstance(j, tuple):
+            return tuple(jS / B for jS in j)
+        else:
+            return j / B
+
+    return pure
