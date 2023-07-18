@@ -112,9 +112,12 @@ def coefficients(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=F
         rhoQ = A2 * (ne / nu**3) * (nuB * sint)**2 * f * (K1 / K2 + 6 / iTheta)
         rhoV = A2 * (ne / nu**2) * (nuB * cost)    * g * (K0 / K2) * z0
 
-        return (
-            (jI,    jQ,    jV),
-            (jI*iB, jQ*iB, jV*iB, rhoQ, rhoV),
-        )
+        if pol:
+            return (
+                (jI,    jQ,    jV),
+                (jI*iB, jQ*iB, jV*iB, rhoQ, rhoV),
+            )
+        else:
+            return (jI, jI*iB)
 
     return pure
