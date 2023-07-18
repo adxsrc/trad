@@ -43,7 +43,10 @@ from matplotlib     import pyplot as plt
 
 from phun import phun
 from trad.plasma import u_T_me
-from trad.sync   import *
+
+import importlib
+sync = importlib.import_module("trad.sync.Leung+2011")
+coefficients = sync.coefficients
 ```
 
 ## Standard Assumptions
@@ -76,13 +79,13 @@ def mkB(u_ne, u_res=u.G, backend=None):
 
 @phun
 def mkLnu(u_nu, u_ne, u_res=u.erg/u.s/u.Hz, backend=None):
-    B   = mkB(u_ne)
-    jnu = emissivity(u_nu, u_ne, u_T_me, B.unit, u.rad)
-    V   = (4/3) * pi * R**3
-    s   = float((4 * pi * u.sr) * V * jnu.unit / u_res)
+    B = mkB(u_ne)
+    C = coefficients(u_nu, u_ne, u_T_me, B.unit, u.rad)
+    V = (4/3) * pi * R**3
+    s = float((4 * pi * u.sr) * V * C.unit[0] / u_res)
 
     def pure(nu, ne):
-        return s * jnu(nu, ne, Te, B(ne), theta)
+        return s * C(nu, ne, Te, B(ne), theta)[0]
 
     return pure
 
@@ -99,12 +102,12 @@ def mkFnu(u_nu, u_ne, u_res=u.Jy, backend=None):
 
 @phun
 def mktaunu(u_nu, u_ne, u_res=u.dimensionless_unscaled, backend=None):
-    B   = mkB(u_ne)
-    anu = absorptivity(u_nu, u_ne, u_T_me, B.unit, u.rad)
-    s   = float(R * anu.unit / u_res)
+    B = mkB(u_ne)
+    C = coefficients(u_nu, u_ne, u_T_me, B.unit, u.rad)
+    s = float(R * C.unit[1] / u_res)
 
     def pure(nu, ne):
-        return s * anu(nu, ne, Te, B(ne), theta)
+        return s * C(nu, ne, Te, B(ne), theta)[1]
 
     return pure
 ```
