@@ -22,10 +22,10 @@ from ..specradiance import blackbody
 
 
 @phun({
-    'si' : (u.W      ) / u.sr / u.m**3  / u.Hz,
-    'cgs': (u.erg/u.s) / u.sr / u.cm**3 / u.Hz,
+    'si' : ((u.W      ) / u.sr / u.m**3  / u.Hz, u.m **-1),
+    'cgs': ((u.erg/u.s) / u.sr / u.cm**3 / u.Hz, u.cm**-1),
 })
-def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=False):
+def coefficients(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=False):
     r"""Synchrotron emissivity
 
     An approximation of the synchrotron emissivity at given
@@ -58,95 +58,63 @@ def emissivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=Fal
 
     """
     exp = backend.exp
-    sin = backend.sin
-    tan = backend.tan
-    nuB = gyrofrequency(u_B)
-
-    r = float(u_theta.to(u.rad))
-    t = float(u_T_me.to(u_Te))
-
-    s1 = float(1.5 / t**2)
-    s2 = float(t   / 0.75)
-    A  = float((0.5 / 3**0.5) * (c.cgs.e.gauss**2/c.c/u.sr) * u_ne * u_nu / u_res) * t**2
-    x  = float(1 * u_nu / nuB.unit)
-
-    def pure(nu, ne, Te, B, theta):
-        nuc  = s1 * Te**2 * nuB(B) * sin(theta * r)
-        iX   = nuc / (x * nu)
-        iX13 = iX**(1/3)
-        iX23 = iX13*iX13
-        s3  = A * (ne * nu/Te**2) * exp(-1.8899/iX13)
-        fI  = 2.5651 + 4.9250*iX13 + 2.5592*iX23
-        return s3 * fI
-
-    def purepol(nu, ne, Te, B, theta):
-        nuc  = s1 * Te**2 * nuB(B) * sin(theta * r)
-        iX   = nuc / (x * nu)
-        iX16 = iX**(1/6)
-        iX13 = iX16*iX16
-        iX12 = iX13*iX16
-        iX23 = iX13*iX13
-        s3  = A * (ne * nu/Te**2) * exp(-1.8899/iX13)
-        fI  = 2.5651 + 4.9250*iX13 + 2.5592*iX23
-        fQ  = 2.5651 + 2.3907*iX13 + 1.2820*iX23
-        fV  = 1.8138*iX + 3.4230*iX23 + 0.02955*iX12 + 2.0377*iX13
-        return (
-            s3 * fI,
-            s3 * fQ,
-            s3 * fV * s2 / (Te * tan(theta * r)),
-        )
-
-    return purepol if pol else pure
-
-
-@phun({
-    'si' : 1/u.m,
-    'cgs': 1/u.cm,
-})
-def absorptivity(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=False):
-    r"""Synchrotron absorptivity"""
-
-    Bnu = blackbody(u_nu, u_Te)
-    jnu = emissivity(u_nu, u_ne, u_Te, u_B, u_theta, pol=pol)
-
-    if not pol:
-        def pure(nu, ne, Te, B, theta):
-            j = jnu(nu, ne, Te, B, theta)
-            B = Bnu(nu, Te)
-            return j / B
-        return pure
-
-    exp = backend.exp
     log = backend.log
     sin = backend.sin
     cos = backend.cos
-    nuB = gyrofrequency(u_B)
+    grf = gyrofrequency(u_B)
+    bb  = blackbody(u_nu, u_Te)
 
     r = float(u_theta.to(u.rad))
     t = float(u_T_me.to(u_Te))
 
-    s1 = float(1.5 / t**2)
-    A  = float((u_ne * c.cgs.e.gauss**2 * nuB.unit**2) / (c.m_e * c.c * u_nu**3) / u_res)
+    z0 = float(2 * u_nu / grf.unit)
+    A1 = float((c.cgs.e.gauss**2/c.c/u.sr) * u_ne * u_nu / u_res[0]) * t**2 * (0.5 / 3**0.5)
+    A2 = float((u_ne * c.cgs.e.gauss**2 * grf.unit**2) / (c.m_e * c.c * u_nu**3) / u_res[1])
+    f1 = 3 / (t**2 * z0)
+    f2 = 1.5e-3 * 2**-0.5
+    f3 = t / 0.75
 
-    def purepol(nu, ne, Te, B, theta):
-        j = jnu(nu, ne, Te, B, theta)
-        B = Bnu(nu, Te)
+    def pure(nu, ne, Te, B, theta):
 
-        nuc = s1 * Te**2 * nuB(B) * sin(theta * r)
-        X = (1.5e-3/2**(1/2) * nu/nuc)**(-1/2)
+        sint = sin(theta * r)
+        cost = cos(theta * r)
+        nuB  = grf(B)
+
+        ix   = f1 * Te**2 * nuB * sint / nu
+        ix16 = ix**(1/6)
+        ix13 = ix16*ix16
+        ix12 = ix13*ix16
+        ix23 = ix13*ix13
+
+        f5  = A1 * (ne * nu / Te**2) * exp(-1.8899/ix13)
+        fI  = 2.5651 + 4.9250*ix13 + 2.5592*ix23
+        fQ  = 2.5651 + 2.3907*ix13 + 1.2820*ix23
+        fV  = 1.8138*ix + 3.4230*ix23 + 0.02955*ix12 + 2.0377*ix13
+
+        jI = f5 * fI
+        jQ = f5 * fQ
+        jV = f5 * fV * f3 * cost / (Te * sint)
+
+        iB = 1 / bb(nu, Te)
+
+        # rhoQ and rhoV are really provided by Shcherbakov (2008)
+
+        X = (f2 / ix)**-0.5
         f = 2.011 * exp(-X**1.035/4.7) - cos(X/2) * exp(-X**1.2/2.73) - 0.011 * exp(-X/47.2)
         g = 1 - 0.11 * log(1 + 0.035 * X)
 
-        T  = Te * u_Te / u_T_me
-        iT = 1 / T
+        iTheta = t / Te
 
-        K0 = kn(0, t/Te)
-        K1 = kn(1, t/Te)
-        K2 = kn(2, t/Te)
+        K0 = kn(0, iTheta)
+        K1 = kn(1, iTheta)
+        K2 = kn(2, iTheta)
 
-        rhoQ =     A * (ne / nu**3) * sin(theta * r)**2 * f * (K0 / K2 + 6 * T)
-        rhoV = 2 * A * (ne / nu**2) * cos(theta * r)    * g * (K1 / K2)
+        rhoQ = A2 * (ne / nu**3) * (nuB * sint)**2 * f * (K1 / K2 + 6 / iTheta)
+        rhoV = A2 * (ne / nu**2) * (nuB * cost)    * g * (K0 / K2) * z0
 
-        return tuple(jS / B for jS in j) + (rhoQ, rhoV)
+        return (
+            (jI,    jQ,    jV),
+            (jI*iB, jQ*iB, jV*iB, rhoQ, rhoV),
+        )
 
-    return purepol
+    return pure
