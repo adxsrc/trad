@@ -28,6 +28,9 @@ We will also use `matplotlib` for plotting.
 %load_ext autoreload
 %autoreload 2
 
+from jax import config
+config.update("jax_enable_x64", True)
+
 from math import pi
 from jax import jit
 from jax import numpy as np
@@ -36,44 +39,67 @@ from matplotlib import pyplot as plt
 
 from trad.plasma import u_T_me
 from trad.sync import Dexter2016 as D16
-from trad.sync import Leung2011  as L11
+
+import importlib
+L11 = importlib.import_module('trad.sync.Leung+2011')
 ```
 
 ## Create Emissivity vs Frequency functions
 
 ```python
-eL11_org = L11.emissivity(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg)
-eD16_org = D16.emissivity(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg)
+L11_org = L11.coefficients(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg)
+D16_org = D16.coefficients(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg, pol=True)
 
-eL11_jit = jit(eL11_org)
-eD16_jit = jit(eD16_org)
+L11_jit = jit(L11_org)
+D16_jit = jit(D16_org)
+```
+
+## Sanity Check
+
+```python
+nu_obs = np.logspace(8,16,num=9)
+D16_jit(nu_obs)
 ```
 
 ## Plot
 
 ```python
-nu_obs = np.logspace(8,16,num=65)
+nu_obs  = np.logspace(8,16,num=1025)
+D16_obs = D16_jit(nu_obs)
+```
 
-eL11_obs = eL11_jit(nu_obs)
-eD16_obs = eD16_jit(nu_obs)
-
+```python
 fig, ax = plt.subplots(1,1,figsize=(8,8))
-ax.loglog(nu_obs, eL11_obs)
-ax.loglog(nu_obs, eD16_obs, '--')
+ax.loglog(nu_obs, D16_obs[0][0])
+ax.loglog(nu_obs, D16_obs[0][1])
+ax.loglog(nu_obs, D16_obs[0][2])
+ax.loglog(nu_obs, D16_obs[1][0])
+ax.loglog(nu_obs, D16_obs[1][1])
+ax.loglog(nu_obs, D16_obs[1][2])
+ax.loglog(nu_obs, abs(D16_obs[1][3]))
+ax.loglog(nu_obs, D16_obs[1][4])
 ax.set_xlim(1e8, 1e16)
-ax.set_ylim(1e-25,1e-15)
+ax.set_ylim(1e-40,1e-0)
+```
+
+```python
+fig, ax = plt.subplots(1,1,figsize=(8,8))
+ax.semilogx(nu_obs, D16_obs[1][3])
+ax.semilogx(nu_obs, D16_obs[1][4])
+ax.set_xlim(1e8, 1e16)
+ax.set_ylim(-1e-8, 1e-8)
 ```
 
 ## Test JAX and Performance
 
-Time the original and jitted version of the code.  The jitted version is about 40x faster!!!
+Time the original and jitted versions of the code.  The jitted version is about 6x faster.
 
 ```python
-%timeit eL11_obs = eL11_org(nu_obs)
-%timeit eL11_obs = eL11_jit(nu_obs)
+%timeit L11_obs = L11_org(nu_obs)
+%timeit L11_obs = L11_jit(nu_obs)
 ```
 
 ```python
-%timeit eD16_obs = eD16_org(nu_obs)
-%timeit eD16_obs = eD16_jit(nu_obs)
+%timeit D16_obs = D16_org(nu_obs)
+%timeit D16_obs = D16_jit(nu_obs)
 ```
