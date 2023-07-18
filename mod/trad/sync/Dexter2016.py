@@ -109,8 +109,8 @@ def coefficients(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=F
         K1 = kn(1, iTheta)
         K2 = kn(2, iTheta)
 
-        rhoQ = A2 * (ne / nu**3) * (nuB * sint)**2 * f * (K1 / K2 + 6 / iTheta)
-        rhoV = A2 * (ne / nu**2) * (nuB * cost)    * g * (K0 / K2) * z0
+        rhoQ = A2 * (ne/nu) * (sint * nuB/nu)**2 * f * (K1/K2 + 6/iTheta)
+        rhoV = A2 * (ne/nu) * (cost * nuB/nu)    * g * (K0/K2) * z0
 
         if pol:
             return (

@@ -28,8 +28,8 @@ We will also use `matplotlib` for plotting.
 %load_ext autoreload
 %autoreload 2
 
-from jax import config
-config.update("jax_enable_x64", True)
+#from jax import config
+#config.update("jax_enable_x64", True)
 
 from math import pi
 from jax import jit
@@ -57,14 +57,14 @@ D16_jit = jit(D16_org)
 ## Sanity Check
 
 ```python
-nu_obs = np.logspace(8,16,num=9)
+nu_obs = np.logspace(8,24,num=9)
 D16_jit(nu_obs)
 ```
 
 ## Plot
 
 ```python
-nu_obs  = np.logspace(8,16,num=1025)
+nu_obs  = np.logspace(8,24,num=1025)
 D16_obs = D16_jit(nu_obs)
 ```
 
@@ -78,7 +78,7 @@ ax.loglog(nu_obs, D16_obs[1][1])
 ax.loglog(nu_obs, D16_obs[1][2])
 ax.loglog(nu_obs, abs(D16_obs[1][3]))
 ax.loglog(nu_obs, D16_obs[1][4])
-ax.set_xlim(1e8, 1e16)
+ax.set_xlim(1e8, 1e24)
 ax.set_ylim(1e-40,1e-0)
 ```
 
