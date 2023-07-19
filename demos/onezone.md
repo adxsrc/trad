@@ -43,10 +43,7 @@ from matplotlib     import pyplot as plt
 
 from phun import phun
 from trad.plasma import u_T_me
-
-import importlib
-sync = importlib.import_module("trad.sync.Leung+2011")
-coefficients = sync.coefficients
+from trad.sync.LeungX2011 import coefficients
 ```
 
 ## Standard Assumptions

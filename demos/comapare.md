@@ -39,9 +39,7 @@ from matplotlib import pyplot as plt
 
 from trad.plasma import u_T_me
 from trad.sync import Dexter2016 as D16
-
-import importlib
-L11 = importlib.import_module('trad.sync.Leung+2011')
+from trad.sync import LeungX2011 as L11
 ```
 
 ## Create Emissivity vs Frequency functions
