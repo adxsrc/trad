@@ -13,14 +13,14 @@
 # limitations under the License.
 
 
-"""Units Helper Functions"""
+"""Helper functions related to unit handling."""
 
 
 from astropy import units as u
 
 
 def merge(keys, args, kwargs):
-    """Merge Arguments with Keyworded Arguments"""
+    """Merge arguments with keyworded arguments."""
 
     if len(args) > len(keys):
         raise ValueError(
@@ -31,7 +31,7 @@ def merge(keys, args, kwargs):
 
 
 def arg_unit(name, default, kwargs):
-    """Deduce Argument Units from `kwarg`"""
+    """Deduce argument units from ``kwarg``."""
 
     unit = name+'_unit' # unit name
 
@@ -53,7 +53,7 @@ def arg_unit(name, default, kwargs):
 
 
 def ret_unit(ud, default, kwargs):
-    """Deduce Return Units from `kwarg`"""
+    """Deduce return units from ``kwarg``."""
 
     r = kwargs.get('units', default)
     if isinstance(r, u.UnitBase):

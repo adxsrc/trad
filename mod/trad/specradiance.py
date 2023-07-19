@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-r"""Spectral Radiances or Specific Intensities
+r"""Computing the spectral radiances or specific intensities.
 
 "Intensity" is the historically name of "radiance" but in astronomy we
 are stuck with it.
@@ -44,7 +44,7 @@ from .helper import *
     'cgs': (u.erg/u.s) / u.sr / (u.cm*u.cm) / u.Hz,
 })
 def blackbody(u_nu, u_T, u_res='si', backend=None):
-    r"""Planck's law
+    r"""An implementation of Planck's law.
 
     Spectral density of electromagnetic radiation emitted by a black
     body in thermal equilibrium at a given temperature :math:`T` at

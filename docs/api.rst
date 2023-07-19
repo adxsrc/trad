@@ -46,18 +46,18 @@ trad.sync.LeungX2011 submodule
    :undoc-members:
    :show-inheritance:
 
-trad.helper module
-------------------
-
-.. automodule:: trad.helper
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 trad.units module
 -----------------
 
 .. automodule:: trad.units
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+trad.helper module
+------------------
+
+.. automodule:: trad.helper
    :members:
    :undoc-members:
    :show-inheritance:

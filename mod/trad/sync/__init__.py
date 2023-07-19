@@ -13,16 +13,14 @@
 # limitations under the License.
 
 
-r"""Synchrotron Emissivity and Absorptivity
+r"""Computing the synchrotron emission, bsorption, and Faraday coefficients.
 
 The terminology of emissivity (and absorptivity) are confusing.
-
 Rybicki & Lightman (1986) defines the (monochromatic) emission
 coefficient :math:`j` (:math:`j_\nu`) as energy emitted per unit time
 per unit solid angle and per unit volume (per frequency).
 Hence, the unit of :math:`j_\nu` in cgs is
 :math:`\mathrm{erg}\,\mathrm{s}^{-1}\mathrm{sr}^{-1}\mathrm{cm}^{-3}\mathrm{Hz}^{-1}`.
-
 However, Rybicki & Lightman (1986) also defines the emissivity
 :math:`\epsilon_\nu` to be "energy emitted spontaneously per unit
 frequency per unit time per unit mass", i.e., with cgs unit
@@ -45,4 +43,4 @@ This is consistent with the usage in astrophysics literature nowadays.
 """
 
 
-from .Dexter2016 import * # TODO: dynamically choose which implementation
+from .Dexter2016 import coefficients # TODO: dynamically choose which implementation

@@ -13,11 +13,11 @@
 # limitations under the License.
 
 
-"""Extra helper functions"""
+"""Extra helper functions."""
 
 
 def get_backend(backend):
-    """Deduce Backend"""
+    """Deduce backend based on which modules have been loaded."""
 
     if backend is None:
         import sys

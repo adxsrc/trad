@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-"""Composable Radiative Transfer"""
+"""trad: composable radiative transfer."""
 
 
 __version__ = "0.1.1"

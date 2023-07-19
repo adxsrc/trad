@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-"""Leung et al. (2011) Formulation"""
+"""Synchrotron emission and bsorption used in Leung et al. (2011)."""
 
 
 from astropy import constants as c, units as u
@@ -29,7 +29,7 @@ from ..specradiance import blackbody
     'cgs': ((u.erg/u.s) / u.sr / u.cm**3 / u.Hz, u.cm**-1),
 })
 def coefficients(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=False):
-    r"""Synchrotron emissivity and absorptivity
+    r"""Computing the synchrotron emission and bsorption.
 
     An approximation of the synchrotron emissivity and absorptivity at
     given

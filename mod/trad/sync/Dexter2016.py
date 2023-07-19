@@ -13,14 +13,14 @@
 # limitations under the License.
 
 
-"""Dexter (2016) Formulation"""
+"""Synchrotron emission, bsorption, and Faraday coefficients used in Dexter (2016)."""
 
 
 from astropy import constants as c, units as u
 from scipy.special import kn # jax does not support kn
 from phun import phun
 
-from ..plasma import u_T_me, gyrofrequency
+from ..plasma       import u_T_me, gyrofrequency
 from ..specradiance import blackbody
 
 
@@ -29,7 +29,7 @@ from ..specradiance import blackbody
     'cgs': ((u.erg/u.s) / u.sr / u.cm**3 / u.Hz, u.cm**-1),
 })
 def coefficients(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=False):
-    r"""Synchrotron emissivity, absorptivity, and Faraday coefficients
+    r"""Computing the synchrotron emission, bsorption, and Faraday coefficients.
 
     An approximation of the synchrotron emissivity at given
     frequency               :math:`\nu`,

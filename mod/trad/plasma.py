@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-"""Plasma Formulas"""
+"""Plasma physics formulas."""
 
 
 from astropy import constants as c, units as u
@@ -25,7 +25,7 @@ u_T_me = u.def_unit('T_me', c.m_e * c.c**2 / c.k_B)
 
 @phun
 def gyrofrequency(u_B, u_res=u.Hz, backend=None):
-    """Electron Cyclotron Frequency"""
+    """Compute the electron cyclotron frequency."""
 
     with u.set_enabled_equivalencies([(u.Hz, u.cycle/u.s)]):
         u_res = (1.0 * u_res).to(u.cycle/u.s)
