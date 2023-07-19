@@ -13,6 +13,9 @@
 # limitations under the License.
 
 
+"""Leung et al. (2011) Formulation"""
+
+
 from astropy import constants as c, units as u
 from scipy.special import kn # jax does not support kn
 from phun import phun
