@@ -13,7 +13,7 @@ jupyter:
     name: python3
 ---
 
-# One-Zone Model for Optically Thin Accreetion Flows
+# One-Zone Model for Optically Thin Accretion Flows
 
 This notebook contains an one-zone model used in the EHT Sgr A* Theory Paper V.
 
@@ -25,7 +25,7 @@ This notebook can be modified to perfrom one-zone model estimates for other AGNs
 ## Autoreload and Import Modules
 
 To streamline the development of `trad`, we enable the autoreload `ipython` extension.
-This makes any changes to `trad` code automatically available in this notebook.
+This makes any changes to `trad` source code automatically available in this notebook.
 
 We first input the necessary `python` modules.  Just like `trad`, we use `astropy`'s unit and constant modules.
 We will also use `scipy` for root finding and `matplotlib` for plotting.
@@ -41,9 +41,9 @@ from astropy        import constants as c, units as u
 from scipy.optimize import root
 from matplotlib     import pyplot as plt
 
-from phun import phun
+from phun        import phun
 from trad.plasma import u_T_me
-from trad.sync.LeungX2011 import coefficients
+from trad.sync   import coefficients
 ```
 
 ## Standard Assumptions
@@ -68,27 +68,27 @@ Using a uniform plasma ball with radius $R$, our one zone model leads to:
 
 ```python
 @phun
-def mkB(u_ne, u_res=u.G, backend=None):
+def magneticfield(u_ne, u_res=u.G, backend=None): # closure on Rhigh and beta
     s = float((2 * c.mu0 * c.k_B * u_ne * u_T_me * (1 + Rhigh) / beta)**(1/2) / u_res)
     def pure(ne):
-        return (ne * Te)**(1/2) * s
+        return s * (ne * Te)**0.5
     return pure
 
 @phun
-def mkLnu(u_nu, u_ne, u_res=u.erg/u.s/u.Hz, backend=None):
-    B = mkB(u_ne)
-    C = coefficients(u_nu, u_ne, u_T_me, B.unit, u.rad)
+def luminosity(u_nu, u_ne, u_res=u.erg/u.s/u.Hz, backend=None): # closure on R
+    B = magneticfield(u_ne)
+    C = coefficients(u_nu, u_ne, u_T_me, B.unit, u.rad, pol=False)
     V = (4/3) * pi * R**3
     s = float((4 * pi * u.sr) * V * C.unit[0] / u_res)
 
-    def pure(nu, ne):
+    def pure(nu, ne): # closure on theta and Te
         return s * C(nu, ne, Te, B(ne), theta)[0]
 
     return pure
 
 @phun
-def mkFnu(u_nu, u_ne, u_res=u.Jy, backend=None):
-    Lnu = mkLnu(u_nu, u_ne)
+def flux(u_nu, u_ne, u_res=u.Jy, backend=None): # closure on D
+    Lnu = luminosity(u_nu, u_ne)
     S   = 4 * pi * D * D
     s   = float(Lnu.unit / S / u_res)
 
@@ -98,22 +98,22 @@ def mkFnu(u_nu, u_ne, u_res=u.Jy, backend=None):
     return pure
 
 @phun
-def mktaunu(u_nu, u_ne, u_res=u.dimensionless_unscaled, backend=None):
-    B = mkB(u_ne)
+def opticaldepth(u_nu, u_ne, u_res=u.dimensionless_unscaled, backend=None): # closure on R
+    B = magneticfield(u_ne)
     C = coefficients(u_nu, u_ne, u_T_me, B.unit, u.rad)
     s = float(R * C.unit[1] / u_res)
 
-    def pure(nu, ne):
+    def pure(nu, ne): # closure on theta and Te
         return s * C(nu, ne, Te, B(ne), theta)[1]
 
     return pure
 ```
 
 ```python
-B     = mkB(u.cm**-3)
-Lnu   = mkLnu(u.Hz, u.cm**-3)
-Fnu   = mkFnu(u.Hz, u.cm**-3)
-taunu = mktaunu(u.Hz, u.cm**-3)
+B     = magneticfield(u.cm**-3)
+Lnu   = luminosity(u.Hz, u.cm**-3)
+Fnu   = flux(u.Hz, u.cm**-3)
+taunu = opticaldepth(u.Hz, u.cm**-3)
 ```
 
 ## Sanity Check
