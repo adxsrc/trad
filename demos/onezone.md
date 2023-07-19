@@ -50,6 +50,7 @@ from trad.sync   import coefficients
 
 We set the standard parameters.
 Note that we skip setting the electron number density $n_e$, because that is the parameter we need to fit.
+Other explicit parameters include the EHT observation frequency $\nu$ and electron temperature $T_e$.
 
 ```python
 M     = 4.14e6 * c.M_sun          # black hole mass
@@ -57,7 +58,6 @@ R     = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone m
 D     = 8127   * u.pc             # distance to black hole
 
 theta = pi / 3                    # angle between magnetic field and line of sight
-Te    = 10                        # electron tempearture in unit of electron rest mass energy
 Rhigh = 3                         # R_high parameter
 beta  = 1                         # plasma beta
 ```
@@ -68,52 +68,52 @@ Using a uniform plasma ball with radius $R$, our one zone model leads to:
 
 ```python
 @phun
-def magneticfield(u_ne, u_res=u.G, backend=None): # closure on Rhigh and beta
-    s = float((2 * c.mu0 * c.k_B * u_ne * u_T_me * (1 + Rhigh) / beta)**(1/2) / u_res)
-    def pure(ne):
+def magneticfield(u_ne, u_Te, u_res=u.G, backend=None): # closure on Rhigh and beta
+    s = float((2 * c.mu0 * c.k_B * u_ne * u_Te * (1 + Rhigh) / beta)**(1/2) / u_res)
+    def pure(ne, Te):
         return s * (ne * Te)**0.5
     return pure
 
 @phun
-def luminosity(u_nu, u_ne, u_res=u.erg/u.s/u.Hz, backend=None): # closure on R
-    B = magneticfield(u_ne)
-    C = coefficients(u_nu, u_ne, u_T_me, B.unit, u.rad, pol=False)
+def luminosity(u_nu, u_ne, u_Te, u_res=u.erg/u.s/u.Hz, backend=None): # closure on R
+    B = magneticfield(u_ne, u_Te)
+    C = coefficients(u_nu, u_ne, u_Te, B.unit, u.rad)
     V = (4/3) * pi * R**3
     s = float((4 * pi * u.sr) * V * C.unit[0] / u_res)
 
-    def pure(nu, ne): # closure on theta and Te
-        return s * C(nu, ne, Te, B(ne), theta)[0]
+    def pure(nu, ne, Te): # closure on theta
+        return s * C(nu, ne, Te, B(ne, Te), theta)[0]
 
     return pure
 
 @phun
-def flux(u_nu, u_ne, u_res=u.Jy, backend=None): # closure on D
-    Lnu = luminosity(u_nu, u_ne)
+def flux(u_nu, u_ne, u_Te, u_res=u.Jy, backend=None): # closure on D
+    Lnu = luminosity(u_nu, u_ne, u_Te)
     S   = 4 * pi * D * D
     s   = float(Lnu.unit / S / u_res)
 
-    def pure(nu, ne):
-        return s * Lnu(nu, ne)
+    def pure(nu, ne, Te):
+        return s * Lnu(nu, ne, Te)
 
     return pure
 
 @phun
-def opticaldepth(u_nu, u_ne, u_res=u.dimensionless_unscaled, backend=None): # closure on R
-    B = magneticfield(u_ne)
-    C = coefficients(u_nu, u_ne, u_T_me, B.unit, u.rad)
+def depth(u_nu, u_ne, u_Te, u_res=u.dimensionless_unscaled, backend=None): # closure on R
+    B = magneticfield(u_ne, u_Te)
+    C = coefficients(u_nu, u_ne, u_Te, B.unit, u.rad)
     s = float(R * C.unit[1] / u_res)
 
-    def pure(nu, ne): # closure on theta and Te
-        return s * C(nu, ne, Te, B(ne), theta)[1]
+    def pure(nu, ne, Te): # closure on theta
+        return s * C(nu, ne, Te, B(ne, Te), theta)[1]
 
     return pure
 ```
 
 ```python
-B     = magneticfield(u.cm**-3)
-Lnu   = luminosity(u.Hz, u.cm**-3)
-Fnu   = flux(u.Hz, u.cm**-3)
-taunu = opticaldepth(u.Hz, u.cm**-3)
+B     = magneticfield(u.cm**-3, u_T_me)
+Lnu   = luminosity(u.Hz, u.cm**-3, u_T_me)
+Fnu   = flux(u.Hz, u.cm**-3, u_T_me)
+taunu = depth(u.Hz, u.cm**-3, u_T_me)
 ```
 
 ## Sanity Check
@@ -124,9 +124,10 @@ Check if this give reasonable magnetic field and flux.
 ```python
 nu = 230e9 # observe frequency
 ne =   1e6 # make a first guess...
+Te =    10 # electron tempearture in unit of electron rest mass energy
 
-display(B(ne))
-display(Fnu(nu, ne))
+display(B(ne, Te))
+display(Fnu(nu, ne, Te))
 ```
 
 ## Solve the One-Zone Model
@@ -136,7 +137,7 @@ Really solve for $n_e$ using `scipy.optimize.root`.
 ```python
 Fnu_obs = 2.4 # target flux in Jy
 
-r  = root(lambda ne: Fnu(nu, ne) - Fnu_obs, 1e6)
+r  = root(lambda ne: Fnu(nu, ne, Te) - Fnu_obs, 1e6)
 x0 = r.x[0]
 
 display(r)
@@ -147,11 +148,13 @@ display(r)
 ```python
 ne = x0 # solution
 
+display(nu)
 display(ne)
-display(B(ne))
-display(nu * Lnu(nu, ne))
-display(Fnu(nu, ne))
-display(taunu(nu, ne))
+display(Te)
+display(B(ne, Te))
+display(nu * Lnu(nu, ne, Te))
+display(Fnu(nu, ne, Te))
+display(taunu(nu, ne, Te))
 ```
 
 ## Sgr A* SED
@@ -169,12 +172,12 @@ ax.set_ylim(1e28,1e36)
 ax.set_xlabel(r'Frequency $\nu$ [Hz]')
 ax.set_ylabel(r'$\nu L_\nu$ [erg/s]')
 
-nuLnu_obs = nu_obs * Lnu(nu_obs, ne/2)
+nuLnu_obs = nu_obs * Lnu(nu_obs, ne/2, Te)
 ax.loglog(nu_obs, nuLnu_obs)
 
-nuLnu_obs = nu_obs * Lnu(nu_obs, ne)
+nuLnu_obs = nu_obs * Lnu(nu_obs, ne, Te)
 ax.loglog(nu_obs, nuLnu_obs)
 
-nuLnu_obs = nu_obs * Lnu(nu_obs, ne*2)
+nuLnu_obs = nu_obs * Lnu(nu_obs, ne*2, Te)
 ax.loglog(nu_obs, nuLnu_obs)
 ```
