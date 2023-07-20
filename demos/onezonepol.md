@@ -137,12 +137,24 @@ We know $n_e \sim 10^6\,\mathrm{cm}^{-3}$.
 Check if this give reasonable magnetic field and flux.
 
 ```python
-nu = 230e9 # observe frequency
-ne =   1e6 # make a first guess...
-Te =    10 # electron tempearture in unit of electron rest mass energy
+nu   = 230e9 # observe frequency
+ne   = 1e6   # make a first guess...
+Te   = 10    # electron tempearture in unit of electron rest mass energy
+beta = 1
 
-display(B(ne, Te))
-display(Fnu(nu, ne, Te))
+L, tau1, tauV1 = Lnu(nu, ne, Te, B(ne, Te, beta))
+F, tau2, tauV2 = Fnu(nu, ne, Te, B(ne, Te, beta))
+
+assert (tau1  == tau2 ).all()
+assert (tauV1 == tauV2).all()
+
+plt.imshow(F[:,:,0,0])
+
+display(B(ne, Te, beta))
+display(np.sum(L))
+display(np.sum(F))
+display(np.max(tau1))
+display(np.max(tauV1))
 ```
 
 ## Solve the One-Zone Model
@@ -152,7 +164,7 @@ Really solve for $n_e$ using `scipy.optimize.root`.
 ```python
 Fnu_obs = 2.4 # target flux in Jy
 
-r  = root(lambda ne: Fnu(nu, ne, Te) - Fnu_obs, 1e6)
+r  = root(lambda ne: np.sum(Fnu(nu, ne, Te, B(ne, Te, beta))[0]) - Fnu_obs, 1e6)
 x0 = r.x[0]
 
 display(r)
@@ -166,10 +178,10 @@ ne = x0 # solution
 display(nu)
 display(ne)
 display(Te)
-display(B(ne, Te))
-display(nu * Lnu(nu, ne, Te))
-display(Fnu(nu, ne, Te))
-display(taunu(nu, ne, Te))
+display(B(ne, Te, beta))
+display(np.sum(Lnu(nu, ne, Te, B(ne, Te, beta))[0]) * nu)
+display(np.sum(Fnu(nu, ne, Te, B(ne, Te, beta))[0]))
+display(np.max(Fnu(nu, ne, Te, B(ne, Te, beta))[1]))
 ```
 
 ## Sgr A* SED
@@ -182,17 +194,17 @@ nu_obs = np.logspace(8,16,num=65)
 fig, ax = plt.subplots(1,1,figsize=(8,8))
 
 ax.set_xlim(1e8, 1e16)
-ax.set_ylim(1e28,1e36)
+ax.set_ylim(1e28,1e40)
 
 ax.set_xlabel(r'Frequency $\nu$ [Hz]')
 ax.set_ylabel(r'$\nu L_\nu$ [erg/s]')
 
-nuLnu_obs = nu_obs * Lnu(nu_obs, ne/2, Te)
+nuLnu_obs = nu_obs * np.array([np.sum(Lnu(nu, ne/2, Te, B(ne/2, Te, beta))[0]) for nu in nu_obs])
 ax.loglog(nu_obs, nuLnu_obs)
 
-nuLnu_obs = nu_obs * Lnu(nu_obs, ne, Te)
+nuLnu_obs = nu_obs * np.array([np.sum(Lnu(nu, ne,   Te, B(ne,   Te, beta))[0]) for nu in nu_obs])
 ax.loglog(nu_obs, nuLnu_obs)
 
-nuLnu_obs = nu_obs * Lnu(nu_obs, ne*2, Te)
+nuLnu_obs = nu_obs * np.array([np.sum(Lnu(nu, ne*2, Te, B(ne*2, Te, beta))[0]) for nu in nu_obs])
 ax.loglog(nu_obs, nuLnu_obs)
 ```
