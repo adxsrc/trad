@@ -53,13 +53,12 @@ Note that we skip setting the electron number density $n_e$, because that is the
 Other explicit parameters include the EHT observation frequency $\nu$ and electron temperature $T_e$.
 
 ```python
-M     = 4.14e6 * c.M_sun          # black hole mass
-R     = 5      * c.G * M / c.c**2 # radius of the solid sphere in the one-zone model
-D     = 8127   * u.pc             # distance to black hole
+M     = 4.14e6 * c.M_sun # black hole mass
+D     = 8127   * u.pc    # distance to black hole
 
-theta = pi / 3                    # angle between magnetic field and line of sight
-Rhigh = 3                         # R_high parameter
-beta  = 1                         # plasma beta
+R     = 5                # radius of the solid sphere in the one-zone model
+theta = pi / 3           # angle between magnetic field and line of sight
+Rhigh = 0                # R_high parameter
 ```
 
 ## The One Zone Model
@@ -67,11 +66,13 @@ beta  = 1                         # plasma beta
 Using a uniform plasma ball with radius $R$, our one zone model leads to:
 
 ```python
+rg = u.def_unit('rg', c.G * M / c.c**2)
+
 @phun
-def magneticfield(u_ne, u_Te, u_res=u.G, backend=None): # closure on Rhigh and beta
-    s = float((2 * c.mu0 * c.k_B * u_ne * u_Te * (1 + Rhigh) / beta)**(1/2) / u_res)
-    def pure(ne, Te):
-        return s * (ne * Te)**0.5
+def magneticfield(u_ne, u_Te, u_res=u.G, backend=None): # closure on Rhigh
+    s = float((2 * c.mu0 * c.k_B * u_ne * u_Te * (1 + Rhigh))**(1/2) / u_res)
+    def pure(ne, Te, beta):
+        return s * (ne * Te / beta)**0.5
     return pure
 
 @phun
