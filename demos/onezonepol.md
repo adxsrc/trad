@@ -107,10 +107,28 @@ def flux(u_nu, u_ne, u_Te, u_B, u_res=u.Jy, backend=None): # closure on D
 ```
 
 ```python
-B     = magneticfield(u.cm**-3, u_T_me)
-Lnu   = luminosity(u.Hz, u.cm**-3, u_T_me)
-Fnu   = flux(u.Hz, u.cm**-3, u_T_me)
-taunu = depth(u.Hz, u.cm**-3, u_T_me)
+B   = magneticfield(u.cm**-3, u_T_me)
+Inu = constant(u.Hz, u.cm**-3, u_T_me, u.G, u.deg, rg, pol=True)
+Lnu = luminosity(u.Hz, u.cm**-3, u_T_me, u.G)
+Fnu = flux(u.Hz, u.cm**-3, u_T_me, u.G)
+```
+
+```python
+Inu(230e9, 100, 10, 10, 60, R)
+```
+
+```python
+L = np.logspace(2,10,num=65)
+I, tau, tauV = Inu(230e9, 100, 10, 10, 60, L)
+plt.loglog(L, I)
+plt.loglog(L, tau)
+plt.loglog(L, tauV)
+plt.xlabel(f'Path length ($M$)')
+```
+
+```python
+F, tau, tauV = Fnu(230e9, 100, 10, 10)
+plt.imshow(F[:,:,0,0])
 ```
 
 ## Sanity Check
