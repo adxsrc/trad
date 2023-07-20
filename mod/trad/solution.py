@@ -27,7 +27,7 @@ from .sync   import coefficients
     'si' : (u.W      ) / u.sr / (u.m *u.m ) / u.Hz,
     'cgs': (u.erg/u.s) / u.sr / (u.cm*u.cm) / u.Hz,
 })
-def constant(u_nu, u_ne, u_Te, u_B, u_theta, u_L, u_I, u_res='si', backend=None, pol=False):
+def constant(u_nu, u_ne, u_Te, u_B, u_theta, u_L, u_I=None, u_res='si', backend=None, pol=False):
     r"""A solution of the radiative transfer equation.
 
     Using :math:`j_\nu` and :math:`\alpha_\nu` to denote the emission
@@ -57,10 +57,13 @@ def constant(u_nu, u_ne, u_Te, u_B, u_theta, u_L, u_I, u_res='si', backend=None,
 
     """
 
-    Cnu = coefficients(u_nu, u_ne, u_Te, u_B, u_theta, u_res=u_res, pol=pol)
-    s1  = float(Cnu.unit[0] / Cnu.unit[1] / u_res)
-    s2  = float(u_I / u_res)
-    s3  = float(Cnu.unit[1] * u_L)
+    if u_I is None:
+        u_I = u_res
+
+    Cnu = coefficients(u_nu, u_ne, u_Te, u_B, u_theta, pol=pol) # TODO: consider u_res
+    s1  = float(1 * Cnu.unit[0] / Cnu.unit[1] / u_res)
+    s2  = float(1 * u_I / u_res)
+    s3  = float(1 * Cnu.unit[1] * u_L)
 
     def pure(nu, ne, Te, B, theta, L, I=0): # closure on `pol`
         C    = Cnu(nu, ne, Te, B, theta)
