@@ -94,24 +94,14 @@ def luminosity(u_nu, u_ne, u_Te, u_B, u_res=u.erg/u.s/u.Hz, backend=None): # clo
     return pure
 
 @phun
-def flux(u_nu, u_ne, u_Te, u_res=u.Jy, backend=None): # closure on D
-    Lnu = luminosity(u_nu, u_ne, u_Te)
+def flux(u_nu, u_ne, u_Te, u_B, u_res=u.Jy, backend=None): # closure on D
+    Lnu = luminosity(u_nu, u_ne, u_Te, u_B)
     S   = 4 * pi * D * D
     s   = float(Lnu.unit / S / u_res)
 
-    def pure(nu, ne, Te):
-        return s * Lnu(nu, ne, Te)
-
-    return pure
-
-@phun
-def depth(u_nu, u_ne, u_Te, u_res=u.dimensionless_unscaled, backend=None): # closure on R
-    B = magneticfield(u_ne, u_Te)
-    C = coefficients(u_nu, u_ne, u_Te, B.unit, u.rad)
-    s = float(R * C.unit[1] / u_res)
-
-    def pure(nu, ne, Te): # closure on theta
-        return s * C(nu, ne, Te, B(ne, Te), theta)[1]
+    def pure(nu, ne, Te, B):
+        L, tau, tauV = Lnu(nu, ne, Te, B)
+        return s * L, tau, tauV
 
     return pure
 ```
