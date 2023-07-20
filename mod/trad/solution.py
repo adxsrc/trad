@@ -67,6 +67,7 @@ def constant(u_nu, u_ne, u_Te, u_B, u_theta, u_L, u_I, u_res='si', backend=None,
         j, a = (C[0][0], C[1][0]) if pol else (C[0], C[1])
         S    = s1 * j / a
         I0   = s2 * I
-        return S + (I0 - S) * backend.exp(-s3 * a * L)
+        tau  = s3 * a * L
+        return S + (I0 - S) * backend.exp(-tau), tau
 
     return pure
