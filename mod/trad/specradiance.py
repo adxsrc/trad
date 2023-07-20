@@ -68,3 +68,39 @@ def blackbody(u_nu, u_T, u_res='si', backend=None):
         return (a*nu)**3 / backend.expm1(x*nu/T)
 
     return pure
+
+
+@phun({
+    'si' : (u.W      ) / u.sr / (u.m *u.m ) / u.Hz,
+    'cgs': (u.erg/u.s) / u.sr / (u.cm*u.cm) / u.Hz,
+})
+def specradiance(u_res='si', backend=None):
+    r"""A solution of the radiative transfer equation.
+
+    Using :math:`j_\nu` and :math:`\alpha_\nu` to denote the emission
+    and absorption coefficients, the optical depth :math:`\tau_\nu` is
+    defined as
+
+    .. math::
+        \tau_\nu = \int \alpha_\nu dl.
+
+    The solution to the radiative transfer equation is
+
+    .. math::
+        I_\nu = I_\nu(0)\exp(-\tau_\nu) + S_\nu[1 - \exp(-\tau_\nu)],
+
+    where the source function :math:`S_\nu` is
+
+    .. math::
+        S_\nu = \frac{j_\nu}{\alpha_\nu}.
+
+    Assuming physical depth :math:`L` in a uniform thermal radiating
+    media so that :math:`S_\nu = B_\nu` is constant in the media, the
+    solution becomes
+
+    .. math::
+        \tau_\nu &= \alpha_\nu L, \\
+        I_\nu    &= I_\nu(0)\exp(-\tau_\nu) + B_\nu[1 - \exp(-\tau_\nu)].
+
+    """
+    ...
