@@ -68,6 +68,7 @@ def constant(u_nu, u_ne, u_Te, u_B, u_theta, u_L, u_I, u_res='si', backend=None,
         S    = s1 * j / a
         I0   = s2 * I
         tau  = s3 * a * L
-        return S + (I0 - S) * backend.exp(-tau), tau
+        tauV = s3 * C[1][4] * L
+        return S + (I0 - S) * backend.exp(-tau), tau, tauV
 
     return pure
