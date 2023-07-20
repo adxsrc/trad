@@ -41,9 +41,10 @@ from astropy        import constants as c, units as u
 from scipy.optimize import root
 from matplotlib     import pyplot as plt
 
-from phun        import phun
-from trad.plasma import u_T_me
-from trad.sync   import coefficients
+from phun          import phun
+from trad.plasma   import u_T_me
+from trad.sync     import coefficients
+from trad.solution import constant
 ```
 
 ## Standard Assumptions
@@ -76,14 +77,19 @@ def magneticfield(u_ne, u_Te, u_res=u.G, backend=None): # closure on Rhigh
     return pure
 
 @phun
-def luminosity(u_nu, u_ne, u_Te, u_res=u.erg/u.s/u.Hz, backend=None): # closure on R
-    B = magneticfield(u_ne, u_Te)
-    C = coefficients(u_nu, u_ne, u_Te, B.unit, u.rad)
-    V = (4/3) * pi * R**3
-    s = float((4 * pi * u.sr) * V * C.unit[0] / u_res)
+def luminosity(u_nu, u_ne, u_Te, u_B, u_res=u.erg/u.s/u.Hz, backend=None): # closure on R
+    W    = 16
+    N    = 256
+    cc   = W * ((np.arange(N) + 0.5) / N - 0.5) # cell-center
+    x, y = np.meshgrid(cc, cc)
+    L    = (2 * (backend.maximum(R*R - x*x - y*y, 0))**0.5)[:,:,None,None]
 
-    def pure(nu, ne, Te): # closure on theta
-        return s * C(nu, ne, Te, B(ne, Te), theta)[0]
+    Inu = constant(u_nu, u_ne, u_Te, u_B, theta * u.rad, rg, pol=True)
+    s   = float((4*pi*u.sr) * (rg*W/N)**2 * Inu.unit / u_res)
+
+    def pure(nu, ne, Te, B):
+        I, tau, tauV = Inu(nu, ne, Te, B, L)
+        return s * I, tau, tauV
 
     return pure
 
