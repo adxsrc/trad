@@ -127,6 +127,7 @@ ne =   1e6 # make a first guess...
 Te =    10 # electron tempearture in unit of electron rest mass energy
 
 display(B(ne, Te))
+display(Lnu(nu, ne, Te))
 display(Fnu(nu, ne, Te))
 ```
 

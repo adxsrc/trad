@@ -47,7 +47,6 @@ from matplotlib     import pyplot as plt
 
 from phun          import phun
 from trad.plasma   import u_T_me
-from trad.sync     import coefficients
 from trad.solution import constant
 ```
 
