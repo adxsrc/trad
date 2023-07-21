@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'trad'
-copyright = '2022, Chi-kwan Chan'
+copyright = '2022,2023 Chi-kwan Chan'
 author = 'Chi-kwan Chan'
 
 # The full version, including alpha/beta/rc tags
