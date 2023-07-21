@@ -16,22 +16,32 @@
 """Unit tests for `trad.plasma`"""
 
 
+import pytest
+
 from math import isclose
 from astropy import units as u
 
 from trad.plasma import gyrofrequency
 
 
-def test_gyrofrequency():
+@pytest.mark.parametrize(
+    'mag,res', [
+    (1   * u.T, 27992489872.33304 * u.Hz),
+    (10  * u.T, 279924898723.3304 * u.Hz),
+    (100 * u.T, 2799248987233.304 * u.Hz),
+])
+@pytest.mark.parametrize('u_mag', [u.T,  u.Gauss])
+@pytest.mark.parametrize('u_res', [u.Hz, u.cycle/u.s, u.rad/u.s])
+def test_gyrofrequency(u_mag, u_res, mag, res):
 
-    fe = gyrofrequency(u.T)
-    assert isclose(fe(1.0), 27992489872.33304)
+    mag = mag.to(u_mag)
+    res = res.to(u_res, equivalencies=[(u.cy/u.s, u.Hz)])
 
-    fe = gyrofrequency(u.T, u_res=u.rad/u.s)
-    assert isclose(fe(1.0), 175882001077.2163)
+    fe  = gyrofrequency(u_mag, u_res=u_res)
 
-    fe = gyrofrequency(u.Gauss)
-    assert isclose(fe(1.0), 2799248.9872333035)
+    ans = fe(mag.value)
+    ref =    res.value
 
-    fe = gyrofrequency(u.Gauss, u_res=u.rad/u.s)
-    assert isclose(fe(1.0), 17588200.10772163)
+    print(f'{mag:8.2g} -> {res:8.2g}')
+
+    assert isclose(ans, ref)
