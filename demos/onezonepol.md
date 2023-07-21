@@ -217,3 +217,81 @@ F, tau, tauV = Fnu(nu, 1e6, 10, 30)
 plt.plot(nu, F.sum(0).sum(0)[0])
 plt.axhline(2.4)
 ```
+
+## Create Contour Plots
+
+```python
+ne1 = np.logspace(4,10,num=61)
+Te1 = np.logspace(0,3, num=61)
+
+ne, Te = np.meshgrid(ne1, Te1)
+
+F1, tau1, tauV1 = Fnu(230e9, ne, Te, B(ne, Te, 0.01))
+F1tot    = F1.sum(0).sum(0)
+tau1max  = tau1.max(0).max(0)
+tauV1max = tauV1.max(0).max(0)
+
+F2, tau2, tauV2 = Fnu(230e9, ne, Te, B(ne, Te, 1))
+F2tot    = F2.sum(0).sum(0)
+tau2max  = tau2.max(0).max(0)
+tauV2max = tauV2.max(0).max(0)
+
+F3, tau3, tauV3 = Fnu(230e9, ne, Te, B(ne, Te, 100))
+F3tot    = F3.sum(0).sum(0)
+tau3max  = tau3.max(0).max(0)
+tauV3max = tauV3.max(0).max(0)
+```
+
+```python
+def mkpanel(ax, F, tau, tauV, beta):
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+
+    ax.contourf(ne1, Te1, tau,  levels=[0,1],      colors='g', alpha=0.2)
+    ax.contourf(ne1, Te1, tauV, levels=[2*pi,1e9], colors='royalblue', alpha=0.2)
+    ax.contourf(ne1, Te1, F,    levels=[0.5,5],    colors='k', alpha=0.2)
+
+    logrange = range(-2,7)
+    levels = 10**np.linspace(-2,6,num=9)
+    CS = ax.contour(ne1, Te1, B(ne, Te, beta),
+                    levels=levels,
+                    colors='k', linewidths=0.5, linestyles='--')
+
+    # get limits if they're automatic
+    xmin,xmax,ymin,ymax = ax.axis()
+    # work with logarithms for loglog scale middle of the figure:
+    logmid = (np.log10(xmin)+np.log10(xmax))/2, (np.log10(ymin)+np.log10(ymax))/2
+
+    label_pos = []
+    for line in CS.collections:
+        for path in line.get_paths():
+            logvert = np.log10(path.vertices)
+
+            logvert2 = logvert.copy()
+            logvert2[:,1] = (logvert2[:,1] - logmid[1])*1.5 + logmid[1]
+
+            # find closest point
+            logdist = np.linalg.norm(logvert2-logmid, ord=2, axis=1)
+            min_ind = np.argmin(logdist)
+            label_pos.append(10**logvert[min_ind,:])
+
+    # draw labels, hope for the best
+    ax.clabel(CS, inline=True, inline_spacing=3, rightside_up=True, colors='k', fontsize=9,
+              fmt = {v:r"$10^{"+f"{l}"+r"}$G" for v, l in zip(levels, logrange)},
+              manual=label_pos)
+
+    ax.set_xlabel(r"Electron number density $n_e$ [cm$^{-3}$]")
+    ax.set_title(r"$\beta = "+f"{beta}"+"$")
+```
+
+```python
+fig, axes = plt.subplots(1,3,figsize=(8,3), sharey=True)
+
+mkpanel(axes[0], F1tot, tau1max, tauV1max, 0.01)
+mkpanel(axes[1], F2tot, tau2max, tauV2max, 1)
+mkpanel(axes[2], F3tot, tau3max, tauV3max, 100)
+
+axes[0].set_ylabel(r'Electron temperature $\Theta_e$ [$m_e c^2 k_B^{-1}$]')
+
+fig.tight_layout()
+```
