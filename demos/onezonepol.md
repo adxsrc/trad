@@ -184,6 +184,22 @@ display(np.sum(Fnu(nu, ne, Te, B(ne, Te, beta))[0]))
 display(np.max(Fnu(nu, ne, Te, B(ne, Te, beta))[1]))
 ```
 
+```python
+L, tau1, tauV1 = Lnu(nu, ne, Te, B(ne, Te, beta))
+F, tau2, tauV2 = Fnu(nu, ne, Te, B(ne, Te, beta))
+
+assert (tau1  == tau2 ).all()
+assert (tauV1 == tauV2).all()
+
+plt.imshow(F[:,:,0,0])
+
+display(B(ne, Te, beta))
+display(np.sum(L))
+display(np.sum(F))
+display(np.max(tau1))
+display(np.max(tauV1))
+```
+
 ## Sgr A* SED
 
 Plot only the synchrotron SED for Sgr A*, assuming the electron number density is the 1/2 of the solved one, the solved one, and 2x the solved one.
