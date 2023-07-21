@@ -22,7 +22,7 @@ from astropy import units as u
 from trad.specradiance import blackbody
 
 
-def test_gyrofrequency():
+def test_blackbody():
 
     B = blackbody(u.Hz, u.K)
     assert isclose(B(230e9, 1e10), 1.62527756142577e-07)
