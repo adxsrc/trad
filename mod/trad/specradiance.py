@@ -36,8 +36,6 @@ respectively.
 from astropy import constants as c, units as u
 from phun    import phun
 
-from .helper import *
-
 
 @phun({
     'si' : (u.W      ) / u.sr / (u.m *u.m ) / u.Hz,

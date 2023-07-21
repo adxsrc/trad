@@ -19,8 +19,7 @@
 from astropy import constants as c, units as u
 from phun    import phun
 
-from .helper import *
-from .sync   import coefficients
+from .sync import coefficients
 
 
 @phun({
