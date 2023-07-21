@@ -34,6 +34,10 @@ We will also use `scipy` for root finding and `matplotlib` for plotting.
 %load_ext autoreload
 %autoreload 2
 
+import matplotlib
+matplotlib.rcParams['mathtext.fontset'] = 'stix'
+matplotlib.rcParams['font.family'] = 'STIXGeneral'
+
 from math import pi
 import numpy as np
 
@@ -310,4 +314,6 @@ mkpanel(axes[2], F3tot, tau3max, tauV3max, 100)
 axes[0].set_ylabel(r'Electron temperature $\Theta_e$ [$m_e c^2 k_B^{-1}$]')
 
 fig.tight_layout()
+fig.savefig("onezonepol.pdf")
+fig.savefig("onezonepol.png", dpi=300)
 ```
