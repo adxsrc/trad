@@ -208,3 +208,12 @@ ax.loglog(nu_obs, nuLnu_obs)
 nuLnu_obs = nu_obs * np.array([np.sum(Lnu(nu, ne*2, Te, B(ne*2, Te, beta))[0]) for nu in nu_obs])
 ax.loglog(nu_obs, nuLnu_obs)
 ```
+
+## Create Emissivity Plot
+
+```python
+nu = np.linspace(1,500e9)
+F, tau, tauV = Fnu(nu, 1e6, 10, 30)
+plt.plot(nu, F.sum(0).sum(0)[0])
+plt.axhline(2.4)
+```
