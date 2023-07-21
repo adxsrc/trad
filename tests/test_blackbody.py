@@ -16,16 +16,32 @@
 """Unit tests for `trad.blackbody`"""
 
 
+import pytest
+
 from math import isclose
 from astropy import units as u
 
 from trad.specradiance import blackbody
 
 
-def test_blackbody():
+@pytest.mark.parametrize(
+    'freq,T,res', [
+    (230e9 * u.Hz, 1e10 * u.K, 1.6252775792033076e-07 * u.W / (u.Hz * u.sr * u.m**2)),
+])
+@pytest.mark.parametrize('u_freq', [u.Hz, u.MHz, u.GHz])
+@pytest.mark.parametrize('u_T',    [u.K])
+@pytest.mark.parametrize('u_res',  [u.W / (u.Hz * u.sr * u.m**2), u.erg / (u.s * u.Hz * u.sr * u.m**2)])
+def test_blackbody(u_freq, u_T, u_res, freq, T, res):
 
-    B = blackbody(u.Hz, u.K)
-    assert isclose(B(230e9, 1e10), 1.62527756142577e-07)
+    freq = freq.to(u_freq)
+    T    = T   .to(u_T, equivalencies=u.temperature_energy())
+    res  = res.to(u_res)
 
-    B = blackbody(u.GHz, u.K)
-    assert isclose(B(230, 1e10),   1.62527756142577e-07)
+    B    = blackbody(u_freq, u_T, u_res=u_res)
+
+    ans  = B(freq.value, T.value)
+    ref  =   res .value
+
+    print(f'{freq:8.2e}, {T:8.2e} -> {res:8.2e}')
+
+    assert isclose(ans, ref)
