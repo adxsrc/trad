@@ -22,7 +22,7 @@ copyright = '2022,2023 Chi-kwan Chan'
 author = 'Chi-kwan Chan'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.2'
+release = '0.1.3'
 
 
 # -- General configuration ---------------------------------------------------
