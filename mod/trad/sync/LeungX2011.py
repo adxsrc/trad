@@ -29,7 +29,7 @@ from ..specradiance import blackbody
     'cgs': ((u.erg/u.s) / u.sr / u.cm**3 / u.Hz, u.cm**-1),
 })
 def coefficients(u_nu, u_ne, u_Te, u_B, u_theta, u_res='si', backend=None, pol=False):
-    r"""Computing the synchrotron emission and bsorption.
+    r"""Computing the synchrotron emission and absorption.
 
     An approximation of the synchrotron emissivity and absorptivity at
     given
