@@ -262,22 +262,11 @@ tauV3max = tauV3.max(0).max(0)
 ```
 
 ```python
-def mkpanel(ax, F, tau, tauV, beta):
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-
-    ax.contourf(ne1, Te1, tau,  levels=[0,1],      colors='g', alpha=0.2)
-    ax.contourf(ne1, Te1, tauV, levels=[2*pi,1e9], colors='royalblue', alpha=0.2)
-    ax.contourf(ne1, Te1, F,    levels=[0.5,5],    colors='k', alpha=0.2)
-
-    logrange = range(-2,7)
-    levels = 10**np.linspace(-2,6,num=9)
-    CS = ax.contour(ne1, Te1, B(ne, Te, beta),
-                    levels=levels,
-                    colors='k', linewidths=0.5, linestyles='--')
+def mklabels(CS, labels, color, start_nth=0, every_nth=1, offset=0):
 
     # get limits if they're automatic
-    xmin,xmax,ymin,ymax = ax.axis()
+    xmin,xmax,ymin,ymax = CS.axes.axis()
+    
     # work with logarithms for loglog scale middle of the figure:
     logmid = (np.log10(xmin)+np.log10(xmax))/2, (np.log10(ymin)+np.log10(ymax))/2
 
@@ -287,7 +276,7 @@ def mkpanel(ax, F, tau, tauV, beta):
             logvert = np.log10(path.vertices)
 
             logvert2 = logvert.copy()
-            logvert2[:,1] = (logvert2[:,1] - logmid[1])*1.5 + logmid[1]
+            logvert2[:,1] = (logvert2[:,1] - logmid[1])*1.5 + logmid[1] + offset
 
             # find closest point
             logdist = np.linalg.norm(logvert2-logmid, ord=2, axis=1)
@@ -295,24 +284,53 @@ def mkpanel(ax, F, tau, tauV, beta):
             label_pos.append(10**logvert[min_ind,:])
 
     # draw labels, hope for the best
-    ax.clabel(CS, inline=True, inline_spacing=3, rightside_up=True, colors='k', fontsize=9,
-              fmt = {v:r"$10^{"+f"{l}"+r"}$G" for v, l in zip(levels, logrange)},
-              manual=label_pos)
+    ax.clabel(CS, inline=True, inline_spacing=3, rightside_up=True, colors=color, fontsize=9,
+              fmt={v:l for v,l in zip(CS.levels[start_nth::every_nth], labels[start_nth::every_nth])},
+              manual=label_pos[start_nth::every_nth])
+    
+def mkpanel(ax, F, tau, tauV, beta, logmin=-6, start_nth=0):
+    b = B(ne, Te, beta)
+    
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+
+    ax.contourf(ne1, Te1, tau, levels=[0,1], colors='g', alpha=0.2)
+    ax.contourf(ne1, Te1, F,   levels=[2,3], colors='k', alpha=0.2)
+
+    logrange = np.arange(logmin,10)
+    levels = 2 * pi * 10.0**logrange
+    labels = [r"$2\pi\times 10^{"+f"{l}"+r"}$" if l != 0 else r"$2\pi$" for l in logrange]
+    cs = ax.contour(ne1, Te1, tauV,
+                    levels=levels,
+                    colors='b', linewidths=0.5)
+    mklabels(cs, labels, 'b', start_nth=start_nth, every_nth=2, offset=0.2)
+
+    logrange = np.arange(int(np.floor(np.log10(np.min(b)))),10)
+    levels = 10.0**logrange
+    labels = [r"$10^{"+f"{l}"+r"}$G" for l in logrange]
+    cs = ax.contour(ne1, Te1, b,
+                    levels=levels,
+                    colors='r', linewidths=0.5, linestyles='--')
+    mklabels(cs, labels, 'r', offset=-0.2)
 
     ax.set_xlabel(r"Electron number density $n_e$ [cm$^{-3}$]")
     ax.set_title(r"$\beta = "+f"{beta}"+"$")
 ```
 
 ```python
-fig, axes = plt.subplots(1,3,figsize=(8,3), sharey=True)
+fig, axes = plt.subplots(1,3, figsize=(10,3), sharey=True)
+plt.subplots_adjust(wspace=0.1)
 
-mkpanel(axes[0], F1tot, tau1max, tauV1max, 0.01)
-mkpanel(axes[1], F2tot, tau2max, tauV2max, 1)
-mkpanel(axes[2], F3tot, tau3max, tauV3max, 100)
+mkpanel(axes[0], F1tot, tau1max, tauV1max, 0.01, logmin=-5, start_nth=1)
+mkpanel(axes[1], F2tot, tau2max, tauV2max, 1,    logmin=-6)
+mkpanel(axes[2], F3tot, tau3max, tauV3max, 100,  logmin=-7, start_nth=1)
 
 axes[0].set_ylabel(r'Electron temperature $\Theta_e$ [$m_e c^2 k_B^{-1}$]')
 
-fig.tight_layout()
-fig.savefig("onezonepol.pdf")
+fig.savefig("onezonepol.pdf", bbox_inches='tight')
 fig.savefig("onezonepol.png", dpi=300)
+```
+
+```python
+
 ```
