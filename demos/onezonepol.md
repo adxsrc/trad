@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.7
+      jupytext_version: 1.15.1
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -271,15 +271,16 @@ def mklabels(CS, labels, color, start_nth=0, every_nth=1, offset=0):
     logmid = (np.log10(xmin)+np.log10(xmax))/2, (np.log10(ymin)+np.log10(ymax))/2
 
     label_pos = []
-    for line in CS.collections:
-        for path in line.get_paths():
+    for path in CS.get_paths():
+        if path.vertices.size > 0:
             logvert = np.log10(path.vertices)
 
             logvert2 = logvert.copy()
             logvert2[:,1] = (logvert2[:,1] - logmid[1])*1.5 + logmid[1] + offset
-
+        
             # find closest point
             logdist = np.linalg.norm(logvert2-logmid, ord=2, axis=1)
+
             min_ind = np.argmin(logdist)
             label_pos.append(10**logvert[min_ind,:])
 
@@ -293,28 +294,26 @@ def mkpanel(ax, F, tau, tauV, beta, logmin=-6, start_nth=0):
     
     ax.set_xscale('log')
     ax.set_yscale('log')
+    ax.set_ylim(1e0, 1e3)
 
-    ax.contourf(ne1, Te1, tau, levels=[0,1], colors='g', alpha=0.2)
-    ax.contourf(ne1, Te1, F,   levels=[2,3], colors='k', alpha=0.2)
-
-    logrange = np.arange(logmin,10)
-    levels = 2 * pi * 10.0**logrange
-    labels = [r"$2\pi\times 10^{"+f"{l}"+r"}$" if l != 0 else r"$2\pi$" for l in logrange]
-    cs = ax.contour(ne1, Te1, tauV,
-                    levels=levels,
-                    colors='b', linewidths=0.5)
-    mklabels(cs, labels, 'b', start_nth=start_nth, every_nth=2, offset=0.2)
-
+    ax.contourf(ne1, Te1, tau,  levels=[0,1],      colors='g', alpha=0.2)
+    ax.contourf(ne1, Te1, F,    levels=[2,3],      colors='k', alpha=0.2)
+    ax.contourf(ne1, Te1, tauV, levels=[2*pi,1e8], colors='#0066ff', alpha=0.2)
+    
     logrange = np.arange(int(np.floor(np.log10(np.min(b)))),10)
     levels = 10.0**logrange
     labels = [r"$10^{"+f"{l}"+r"}$G" for l in logrange]
     cs = ax.contour(ne1, Te1, b,
                     levels=levels,
                     colors='r', linewidths=0.5, linestyles='--')
-    mklabels(cs, labels, 'r', offset=-0.2)
+    mklabels(cs, labels, 'r', offset=0.75)
 
     ax.set_xlabel(r"Electron number density $n_e$ [cm$^{-3}$]")
     ax.set_title(r"$\beta = "+f"{beta}"+"$")
+    
+    ax.text(1e6*beta**.3, 1e2, 'Optically Thin', color='g',       rotation=62)
+    ax.text(2e8,          5,   'Total Flux',     color='k'                   )
+    ax.text(6e7*beta**.3, 1e2, 'Faraday Thick',  color='#0066ff', rotation=62)
 ```
 
 ```python
@@ -329,8 +328,4 @@ axes[0].set_ylabel(r'Electron temperature $\Theta_e$ [$m_e c^2 k_B^{-1}$]')
 
 fig.savefig("onezonepol.pdf", bbox_inches='tight')
 fig.savefig("onezonepol.png", dpi=300)
-```
-
-```python
-
 ```
