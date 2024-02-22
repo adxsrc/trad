@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.13.7
+      jupytext_version: 1.16.1
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -28,8 +28,8 @@ We will also use `matplotlib` for plotting.
 %load_ext autoreload
 %autoreload 2
 
-#from jax import config
-#config.update("jax_enable_x64", True)
+from jax import config
+config.update("jax_enable_x64", True)
 
 from math import pi
 from jax import jit
@@ -44,6 +44,9 @@ from trad.sync import LeungX2011 as L11
 
 ## Create Emissivity vs Frequency functions
 
+We the generate the emissivity functions `L11_org()` and `D16_org()` by providing `astro.units`.
+To compare performance, we also create the jitted version `L11_jit()` and `D16_jit()`.
+
 ```python
 L11_org = L11.coefficients(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg)
 D16_org = D16.coefficients(u.Hz, 1e7*u.cm**-3, 1e11*u.K, 10*u.Gauss, 60*u.deg, pol=True)
@@ -54,12 +57,16 @@ D16_jit = jit(D16_org)
 
 ## Sanity Check
 
+We can now perform a sanity check on the numerical values of the coefficients.
+
 ```python
 nu_obs = np.logspace(8,24,num=9)
 D16_jit(nu_obs)
 ```
 
 ## Plot
+
+And plot the coefficients as functions of frequencies.
 
 ```python
 nu_obs  = np.logspace(8,24,num=1025)
@@ -100,4 +107,50 @@ Time the original and jitted versions of the code.  The jitted version is about 
 ```python
 %timeit D16_obs = D16_org(nu_obs)
 %timeit D16_obs = D16_jit(nu_obs)
+```
+
+## Autodiff
+
+One stronge reason to use `JAX` is to enable autodiff.
+So here we overplot the tangent computed from autodiff with the original curves.
+
+```python
+from jax import grad, vmap
+
+f = lambda nu: L11_jit(nu)[0]
+g = vmap(grad(f))
+```
+
+```python
+h = 5e9
+r = slice(100, 200)
+
+X = nu_obs[r]
+Y = f(nu_obs[r])
+S = g(nu_obs[r])
+
+plt.plot(X, Y, linewidth=3, alpha=0.2)
+for x, y, s in list(zip(X, Y, S))[::10]:
+    xm = x - h
+    xp = x + h
+    ym = y - h * s
+    yp = y + h * s
+    plt.plot([xm, xp], [ym, yp])
+```
+
+```python
+h = 5e11
+r = slice(300, 400)
+
+X = nu_obs[r]
+Y = f(nu_obs[r])
+S = g(nu_obs[r])
+
+plt.plot(X, Y, linewidth=3, alpha=0.2)
+for x, y, s in list(zip(X, Y, S))[::10]:
+    xm = x - h
+    xp = x + h
+    ym = y - h * s
+    yp = y + h * s
+    plt.plot([xm, xp], [ym, yp])
 ```
