@@ -50,10 +50,10 @@ def fieldgen(
     Uz = rng.normal(size=Ek.shape)
 
     # Divergence-less condition
-    f  = (Ux*kx + Uy*ky + Uz*kz) * (ik*ik)
-    Ux = a * Ux + (1 - 2 * a) * kx * f
-    Uy = a * Uy + (1 - 2 * a) * ky * f
-    Uz = a * Uz + (1 - 2 * a) * kz * f
+    f  = (Ux*kx + Uy*ky + Uz*kz) * (ik*ik) * (1 - 2 * a)
+    Ux = a * Ux + f * kx
+    Uy = a * Uy + f * ky
+    Uz = a * Uz + f * kz
     
     # Randomize phase
     Ux = Ux * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
