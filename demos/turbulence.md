@@ -30,6 +30,7 @@ def fieldgen(
     p=5/3,     # Energy spectrum is Ek ~ k^{-p}
     a=1,       # degree of divergenless; a=1 divergenless field; a=0 potential field
     seed=None, # random seed
+    iso=True,  # force isotropic spectrum by removing "corners" of the spectrum
 ):
     rng = np.random.default_rng(seed)
 
@@ -37,12 +38,17 @@ def fieldgen(
     k = np.fft.fftfreq(N, r[1])
 
     kx,ky,kz  = np.meshgrid(k,k,k)
-    ik        = (1e-32 + kx*kx + ky*ky + kz*kz)**(-1/2)
+    kk        = kx*kx + ky*ky + kz*kz
+
+    ik        = kk**(-1/2)
     ik[0,0,0] = 0
+    if iso:
+        kmax = np.max(k)
+        ik[kk > kmax*kmax] = 0
 
     Ek        = ik**(p + (ik.ndim - 1))
     Ek[0,0,0] = 0
-
+    
     # Randomize directions
     Ux = rng.normal(size=Ek.shape)
     Uy = rng.normal(size=Ek.shape)
