@@ -44,4 +44,38 @@ def divless(N=256, p=5/3, seed=None):
     Ux = rng.normal(size=Ek.shape)
     Uy = rng.normal(size=Ek.shape)
     Uz = rng.normal(size=Ek.shape)
+
+    # Randomize phase
+    Ux = Ux * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
+    Uy = Uy * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
+    Uz = Uz * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
+
+    # Spectral shape
+    Ux *= Uk
+    Uy *= Uk
+    Uz *= Uk
+
+    # Obtain divergence-less field in physical domain
+    ux = np.fft.ifftn(Ux, norm='forward').real
+    uy = np.fft.ifftn(Uy, norm='forward').real
+    uz = np.fft.ifftn(Uz, norm='forward').real
+
+    return (ux, uy, uz), r, k
+```
+
+```python
+(ux,uy,uz), r, k = divless()
+```
+
+```python
+fig, (ax0, ax1, ax2) = plt.subplots(1,3,figsize=(12,4))
+
+ax0.imshow(ux[:,:,0], vmin=-10, vmax=10, cmap='coolwarm')
+ax0.set_aspect('equal')
+
+ax1.imshow(uy[:,:,0], vmin=-10, vmax=10, cmap='coolwarm')
+ax1.set_aspect('equal')
+
+ax2.imshow(uz[:,:,0], vmin=-10, vmax=10, cmap='coolwarm')
+ax2.set_aspect('equal')
 ```
