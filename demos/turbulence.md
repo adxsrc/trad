@@ -65,10 +65,12 @@ def divless(N=256, p=5/3, seed=None):
 
 ```python
 (ux,uy,uz), r, k = divless()
+
+x, y = np.meshgrid(r,r)
 ```
 
 ```python
-fig, (ax0, ax1, ax2) = plt.subplots(1,3,figsize=(12,4))
+fig, (ax0, ax1, ax2, ax3) = plt.subplots(1,4,figsize=(16,4))
 
 ax0.imshow(ux[:,:,0], vmin=-10, vmax=10, cmap='coolwarm')
 ax0.set_aspect('equal')
@@ -78,4 +80,7 @@ ax1.set_aspect('equal')
 
 ax2.imshow(uz[:,:,0], vmin=-10, vmax=10, cmap='coolwarm')
 ax2.set_aspect('equal')
+
+ax3.quiver(x[::8,::8], y[::8,::8], ux[::8,::8,0], uy[::8,::8,0])
+ax3.set_aspect('equal')
 ```
