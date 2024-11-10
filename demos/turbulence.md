@@ -27,6 +27,8 @@ from matplotlib import pyplot as plt
 ```python
 def divless(N=256, p=5/3, seed=None):
 
+    rng = np.random.default_rng(seed)
+
     r = np.linspace(0, 1, N, endpoint=False)
     k = np.fft.fftfreq(N, r[1])
 
@@ -37,4 +39,9 @@ def divless(N=256, p=5/3, seed=None):
     Ek        = ik**(p + (ik.ndim - 1))
     Ek[0,0,0] = 0
     Uk        = Ek**(1/2)
+    
+    # Randomize directions
+    Ux = rng.normal(size=Ek.shape)
+    Uy = rng.normal(size=Ek.shape)
+    Uz = rng.normal(size=Ek.shape)
 ```
