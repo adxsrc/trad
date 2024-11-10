@@ -42,8 +42,7 @@ def fieldgen(
 
     Ek        = ik**(p + (ik.ndim - 1))
     Ek[0,0,0] = 0
-    Uk        = Ek**(1/2)
-    
+
     # Randomize directions
     Ux = rng.normal(size=Ek.shape)
     Uy = rng.normal(size=Ek.shape)
@@ -54,16 +53,23 @@ def fieldgen(
     Ux = a * Ux + f * kx
     Uy = a * Uy + f * ky
     Uz = a * Uz + f * kz
-    
+
+    # Spectral shape
+    Uk  = Ek**(1/2)
+    Ux *= Uk
+    Uy *= Uk
+    Uz *= Uk
+
+    # Normalization
+    E   = np.sum(Ux * Ux + Uy * Uy + Uz * Uz) / 2
+    Ux /= E
+    Uy /= E
+    Uz /= E
+
     # Randomize phase
     Ux = Ux * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
     Uy = Uy * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
     Uz = Uz * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
-
-    # Spectral shape
-    Ux *= Uk
-    Uy *= Uk
-    Uz *= Uk
 
     # Obtain divergence-less field in physical domain
     ux = np.fft.ifftn(Ux, norm='forward').real
@@ -74,18 +80,18 @@ def fieldgen(
 ```
 
 ```python
-def mkplot(ux, uy, uz, r):
+def mkplot(ux, uy, uz, r, vmax=np.sqrt(0.5)):
     x, y = np.meshgrid(r,r)
 
     fig, (ax0, ax1, ax2, ax3) = plt.subplots(1,4,figsize=(16,4))
     
-    ax0.imshow(ux[:,:,0], vmin=-10, vmax=10, cmap='coolwarm', origin='lower')
+    ax0.imshow(ux[:,:,0], vmin=-vmax, vmax=vmax, cmap='coolwarm', origin='lower')
     ax0.set_aspect('equal')
     
-    ax1.imshow(uy[:,:,0], vmin=-10, vmax=10, cmap='coolwarm', origin='lower')
+    ax1.imshow(uy[:,:,0], vmin=-vmax, vmax=vmax, cmap='coolwarm', origin='lower')
     ax1.set_aspect('equal')
     
-    ax2.imshow(uz[:,:,0], vmin=-10, vmax=10, cmap='coolwarm', origin='lower')
+    ax2.imshow(uz[:,:,0], vmin=-vmax, vmax=vmax, cmap='coolwarm', origin='lower')
     ax2.set_aspect('equal')
     
     ax3.quiver(x[::8,::8], y[::8,::8], ux[::8,::8,0], uy[::8,::8,0])
@@ -106,13 +112,13 @@ mkplot(bx, by, bz, r)
 ```
 
 ```python
-mkplot(bx+1, by, bz, r)
+mkplot(bx+0.1, by, bz, r)
 ```
 
 ```python
-mkplot(bx+2, by, bz, r)
+mkplot(bx+0.2, by, bz, r)
 ```
 
 ```python
-mkplot(bx+4, by, bz, r)
+mkplot(bx+0.3, by, bz, r)
 ```
