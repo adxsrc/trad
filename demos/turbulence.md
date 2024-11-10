@@ -25,7 +25,7 @@ from matplotlib import pyplot as plt
 ```
 
 ```python
-def divless(N=256, p=5/3, seed=None):
+def fieldgen(N=256, p=5/3, a=1, seed=None):
 
     rng = np.random.default_rng(seed)
 
@@ -46,10 +46,10 @@ def divless(N=256, p=5/3, seed=None):
     Uz = rng.normal(size=Ek.shape)
 
     # Divergence-less condition
-    f   = (Ux*kx + Uy*ky + Uz*kz) * (ik*ik)
-    Ux -= kx * f
-    Uy -= ky * f
-    Uz -= kz * f
+    f  = (Ux*kx + Uy*ky + Uz*kz) * (ik*ik)
+    Ux = a * Ux + (1 - 2 * a) * kx * f
+    Uy = a * Uy + (1 - 2 * a) * ky * f
+    Uz = a * Uz + (1 - 2 * a) * kz * f
     
     # Randomize phase
     Ux = Ux * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
@@ -89,8 +89,8 @@ def mkplot(ux, uy, uz, r):
 ```
 
 ```python
-(ux,uy,uz), r, k = divless()
-(bx,by,bz), r, k = divless()
+(ux,uy,uz), r, k = fieldgen(a=0)
+(bx,by,bz), r, k = fieldgen(a=1)
 ```
 
 ```python
