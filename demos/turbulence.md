@@ -45,6 +45,12 @@ def divless(N=256, p=5/3, seed=None):
     Uy = rng.normal(size=Ek.shape)
     Uz = rng.normal(size=Ek.shape)
 
+    # Divergence-less condition
+    f   = (Ux*kx + Uy*ky + Uz*kz) * (ik*ik)
+    Ux -= kx * f
+    Uy -= ky * f
+    Uz -= kz * f
+    
     # Randomize phase
     Ux = Ux * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
     Uy = Uy * np.exp(1j*rng.uniform(0, 2*np.pi, size=Ek.shape))
@@ -65,6 +71,7 @@ def divless(N=256, p=5/3, seed=None):
 
 ```python
 (ux,uy,uz), r, k = divless()
+(bx,by,bz), r, k = divless()
 
 x, y = np.meshgrid(r,r)
 ```
