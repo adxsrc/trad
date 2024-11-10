@@ -25,8 +25,12 @@ from matplotlib import pyplot as plt
 ```
 
 ```python
-def fieldgen(N=256, p=5/3, a=1, seed=None):
-
+def fieldgen(
+    N=256,     # Number of grid points per dimension
+    p=5/3,     # Energy spectrum is Ek ~ k^{-p}
+    a=1,       # degree of divergenless; a=1 divergenless field; a=0 potential field
+    seed=None, # random seed
+):
     rng = np.random.default_rng(seed)
 
     r = np.linspace(0, 1, N, endpoint=False)
