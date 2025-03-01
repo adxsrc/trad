@@ -13,9 +13,9 @@ jupyter:
     name: python3
 ---
 
-# Polarized One-Zone Model for Accretion Flows
+# Fast Polarized One-Zone Model for Accretion Flows
 
-This notebook contains an one-zone model used in the EHT Sgr A* Theory Paper VIII.
+This notebook contains a fast one-zone model identical to the one used in the EHT Sgr A* Theory Paper VIII.
 
 It assumes that the emissivity of Sgr A* comes from a sphere with radius $R$ with uniform density $n_e$, magnetic fields $B$, temperature $\Theta_\mathrm{e}$, etc.
 
@@ -88,14 +88,12 @@ def magneticfield(u_ne, u_Te, u_res=u.G, backend=None): # closure on Rhigh
 
 @phun
 def luminosity(u_nu, u_ne, u_Te, u_B, u_res=u.erg/u.s/u.Hz, backend=None): # closure on R
-    W    = 16
-    N    = 256
-    cc   = W * ((np.arange(N) + 0.5) / N - 0.5) # cell-center
-    x, y = np.meshgrid(cc, cc)
-    L    = (2 * (backend.maximum(R*R - x*x - y*y, 0))**0.5)[:,:,None,None]
+    N = 256
+    r = R * (np.arange(N) + 0.5) / N # cell-center
+    L = (2 * (backend.maximum(R*R - r*r, 0))**0.5)[:,None,None]
 
     Inu = constant(u_nu, u_ne, u_Te, u_B, theta * u.rad, rg, pol=True)
-    s   = float((4*pi*u.sr) * (rg*W/N)**2 * Inu.unit / u_res)
+    s   = float((4*pi*u.sr) * (2*pi*rg*rg*R/N) * Inu.unit / u_res) * r[:,None,None]
 
     def pure(nu, ne, Te, B):
         I, tau, tauV = Inu(nu, ne, Te, B, L)
@@ -138,7 +136,9 @@ plt.xlabel(f'Path length ($M$)')
 
 ```python
 F, tau, tauV = Fnu(230e9, 100, 10, 10)
-plt.imshow(F[:,:,0,0])
+
+r = R * (np.arange(len(F)) + 0.5) / len(F)
+plt.plot(r, F[:,0,0])
 ```
 
 ## Sanity Check
@@ -158,7 +158,8 @@ F, tau2, tauV2 = Fnu(nu, ne, Te, B(ne, Te, beta))
 assert (tau1  == tau2 ).all()
 assert (tauV1 == tauV2).all()
 
-plt.imshow(F[:,:,0,0])
+r = R * (np.arange(len(F)) + 0.5) / len(F)
+plt.plot(r, F[:,0,0])
 
 display(B(ne, Te, beta))
 display(np.sum(L))
@@ -201,7 +202,8 @@ F, tau2, tauV2 = Fnu(nu, ne, Te, B(ne, Te, beta))
 assert (tau1  == tau2 ).all()
 assert (tauV1 == tauV2).all()
 
-plt.imshow(F[:,:,0,0])
+r = R * (np.arange(len(F)) + 0.5) / len(F)
+plt.plot(r, F[:,0,0])
 
 display(B(ne, Te, beta))
 display(np.sum(L))
@@ -240,7 +242,7 @@ ax.loglog(nu_obs, nuLnu_obs)
 ```python
 nu = np.linspace(1,500e9)
 F, tau, tauV = Fnu(nu, 1e6, 10, 30)
-plt.plot(nu, F.sum(0).sum(0)[0])
+plt.plot(nu, F.sum(0)[0])
 plt.axhline(2.4)
 ```
 
@@ -253,19 +255,19 @@ Te1 = np.logspace(0,3, num=61)
 ne, Te = np.meshgrid(ne1, Te1)
 
 F1, tau1, tauV1 = Fnu(230e9, ne, Te, B(ne, Te, 0.01))
-F1tot    = F1.sum(0).sum(0)
-tau1max  = tau1.max(0).max(0)
-tauV1max = tauV1.max(0).max(0)
+F1tot    = F1.sum(0)
+tau1max  = tau1.max(0)
+tauV1max = tauV1.max(0)
 
 F2, tau2, tauV2 = Fnu(230e9, ne, Te, B(ne, Te, 1))
-F2tot    = F2.sum(0).sum(0)
-tau2max  = tau2.max(0).max(0)
-tauV2max = tauV2.max(0).max(0)
+F2tot    = F2.sum(0)
+tau2max  = tau2.max(0)
+tauV2max = tauV2.max(0)
 
 F3, tau3, tauV3 = Fnu(230e9, ne, Te, B(ne, Te, 100))
-F3tot    = F3.sum(0).sum(0)
-tau3max  = tau3.max(0).max(0)
-tauV3max = tauV3.max(0).max(0)
+F3tot    = F3.sum(0)
+tau3max  = tau3.max(0)
+tauV3max = tauV3.max(0)
 ```
 
 ```python
