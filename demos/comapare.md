@@ -102,6 +102,27 @@ ax.set_xlim(1e8, 1e16)
 ax.set_ylim(-1e-8, 1e-8)
 ```
 
+## Comparison
+
+Compare the Approximations of Leung et al. (2011) and Dexter (2016).
+
+```python
+L11_obs = L11_jit(nu_obs)
+```
+
+```python
+L11_jnu = L11_obs[0]
+D16_jnu = D16_obs[0][0]
+
+L11_anu = L11_obs[1]
+D16_anu = D16_obs[1][0]
+```
+
+```python
+plt.loglog(nu_obs, 2 * (L11_jnu - D16_jnu) / (L11_jnu + D16_jnu))
+plt.loglog(nu_obs, 2 * (L11_anu - D16_anu) / (L11_anu + D16_anu))
+```
+
 ## Test JAX and Performance
 
 Time the original and jitted versions of the code.  The jitted version is about 6x faster.
