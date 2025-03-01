@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.16.1
+      jupytext_version: 1.16.7
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -25,12 +25,19 @@ We first input the necessary `python` modules.  Just like `trad`, we use `astrop
 We will also use `matplotlib` for plotting.
 
 ```python
-%load_ext autoreload
-%autoreload 2
+try:
+    %load_ext autoreload
+    %autoreload 2
+except ModuleNotFoundError as e:
+    print(e)
+```
 
+```python
 from jax import config
 config.update("jax_enable_x64", True)
+```
 
+```python
 from math import pi
 from jax import jit
 from jax import numpy as np

@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.16.4
+      jupytext_version: 1.16.7
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -18,6 +18,14 @@ jupyter:
 This notebook contains a study on how radiative transfer coefficients (i.e., emissivity and absorbability) depend on turbulence. 
 
 Turbulence is modeled by simply providing randomly generating velocity and magnetic fields according to power spectrum indices, although it should be straightforward to incorporate actual turbulence simulations. 
+
+```python
+try:
+    %load_ext autoreload
+    %autoreload 2
+except ModuleNotFoundError as e:
+    print(e)
+```
 
 ```python
 import numpy  as np

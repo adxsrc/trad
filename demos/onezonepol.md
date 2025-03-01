@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.3'
-      jupytext_version: 1.16.1
+      jupytext_version: 1.16.7
   kernelspec:
     display_name: Python 3 (ipykernel)
     language: python
@@ -31,13 +31,20 @@ We first input the necessary `python` modules.  Just like `trad`, we use `astrop
 We will also use `scipy` for root finding and `matplotlib` for plotting.
 
 ```python
-%load_ext autoreload
-%autoreload 2
+try:
+    %load_ext autoreload
+    %autoreload 2
+except ModuleNotFoundError as e:
+    print(e)
+```
 
+```python
 import matplotlib
 matplotlib.rcParams['mathtext.fontset'] = 'stix'
 matplotlib.rcParams['font.family'] = 'STIXGeneral'
+```
 
+```python
 from math import pi
 import numpy as np
 
@@ -328,4 +335,12 @@ axes[0].set_ylabel(r'Electron temperature $\Theta_e$ [$m_e c^2 k_B^{-1}$]')
 
 fig.savefig("onezonepol.pdf", bbox_inches='tight')
 fig.savefig("onezonepol.png", dpi=300)
+```
+
+```python
+
+```
+
+```python
+
 ```
